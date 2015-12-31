@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="HandlerThread,IntentService," />
 
 
 
@@ -53,20 +53,23 @@
 
 <meta name="description" content="###IntentService
 
-IntentService继承自Service,可以处理异步的请求（通过intent）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentServ">
+IntentService继承自Service,可以处理异步的请求（通过intent传递参数）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。
+如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，inten">
 <meta property="og:type" content="article">
 <meta property="og:title" content="IntentService & HandlerThread源码解析">
-<meta property="og:url" content="http://yoursite.com/2015/12/30/IntentServiceHandlerThread/index.html">
-<meta property="og:site_name" content="fanyiran">
+<meta property="og:url" content="http://yoursite.com/2015/12/31/IntentServiceHandlerThread/index.html">
+<meta property="og:site_name" content="梵依然">
 <meta property="og:description" content="###IntentService
 
-IntentService继承自Service,可以处理异步的请求（通过intent）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentServ">
-<meta property="og:updated_time" content="2015-12-29T22:46:50.000Z">
+IntentService继承自Service,可以处理异步的请求（通过intent传递参数）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。
+如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，inten">
+<meta property="og:updated_time" content="2015-12-30T22:28:48.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="IntentService & HandlerThread源码解析">
 <meta name="twitter:description" content="###IntentService
 
-IntentService继承自Service,可以处理异步的请求（通过intent）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentServ">
+IntentService继承自Service,可以处理异步的请求（通过intent传递参数）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。
+如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，inten">
 
 
 
@@ -78,7 +81,7 @@ IntentService继承自Service,可以处理异步的请求（通过intent）.客�
   };
 </script>
 
-  <title> IntentService & HandlerThread源码解析 | fanyiran </title>
+  <title> IntentService & HandlerThread源码解析 | 梵依然 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -119,7 +122,7 @@ IntentService继承自Service,可以处理异步的请求（通过intent）.客�
   <div class="custom-logo-site-title">
     <a href="/"  class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <span class="site-title">fanyiran</span>
+      <span class="site-title">梵依然</span>
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
@@ -227,8 +230,8 @@ IntentService继承自Service,可以处理异步的请求（通过intent）.客�
         <div class="post-meta">
           <span class="post-time">
             发表于
-            <time itemprop="dateCreated" datetime="2015-12-30T06:46:50+08:00" content="2015-12-30">
-              2015-12-30
+            <time itemprop="dateCreated" datetime="2015-12-31T06:28:48+08:00" content="2015-12-31">
+              2015-12-31
             </time>
           </span>
 
@@ -238,8 +241,8 @@ IntentService继承自Service,可以处理异步的请求（通过intent）.客�
             
               <span class="post-comments-count">
                 &nbsp; | &nbsp;
-                <a href="/2015/12/30/IntentServiceHandlerThread/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/30/IntentServiceHandlerThread/" itemprop="commentsCount"></span>
+                <a href="/2015/12/31/IntentServiceHandlerThread/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2015/12/31/IntentServiceHandlerThread/" itemprop="commentsCount"></span>
                 </a>
               </span>
             
@@ -260,107 +263,84 @@ IntentService继承自Service,可以处理异步的请求（通过intent）.客�
       
         <span itemprop="articleBody"><p>###IntentService</p>
 <blockquote>
-<p>IntentService继承自Service,可以处理异步的请求（通过intent）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。<br>如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentService会接受intents,启动一个工作线程，在合适的时候停止这个service。<br>所有的请求都在一个工作线程里边被处理，他们可以运行很久而且不会阻塞应用的主线程，但是同时只能处理一个请求。</p>
+<p>IntentService继承自Service,可以处理异步的请求（通过intent传递参数）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。</p>
+<p>如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentService会接受intents,启动一个工作线程，在合适的时候停止这个service。</p>
+<p>所有的请求都在一个工作线程里边被处理，他们可以运行很久而且不会阻塞应用的主线程，但是同时只能处理一个请求。</p>
 </blockquote>
+<p>首先来看onCreate方法<br>onCreate里生成一个HandlerThread，并通过start（）启动该线程，然后生成一个ServiceHandler</p>
 <pre><code>@Override
 public void onCreate() {
-    /* TODO：最好在这有一个处理部分wakelock（这个坑先留着）        的选项，而且应该有一个静态的    startService(context,intent)方    法启动service同时切换wakelock */
+    /* TODO：最好在这有一个处理部分wakelock（这个坑先留着)的选项，而且应该有一个静态的startService(context,intent)方法启动service同时切换wakelock */
     super.onCreate();
-    HandlerThread thread = new             HandlerThread(&quot;IntentService[&quot; + mName + &quot;]&quot;);
+    HandlerThread thread = new HandlerThread(&quot;IntentService[&quot; + mName + &quot;]&quot;);
     thread.start();
     mServiceLooper = thread.getLooper();
-    mServiceHandler = new     ServiceHandler(mServiceLooper);
+    mServiceHandler = new ServiceHandler(mServiceLooper);
 }
-</code></pre><p>onCreate里生成一个HandlerThread(坑)，并通过start（）启动该线程，然后生成一个ServiceHandler</p>
+</code></pre><p>这是生成的线程中处理消息的Handler</p>
 <pre><code>private final class ServiceHandler extends Handler {
     public ServiceHandler(Looper looper) {
-    super(looper);
-}
+        super(looper);
+    }
 
 
-@Override
-public void handleMessage(Message msg) {
-    onHandleIntent((Intent)msg.obj);
-    //通过这里可以看到，当声明的线程里边相关联的MessageLooper里边        message被处理完毕之后就会停掉整个service
-    stopSelf(msg.arg1);
+    @Override
+    public void handleMessage(Message msg) {
+        onHandleIntent((Intent)msg.obj);
+        //通过这里可以看到，当声明的线程里边相关联的MessageLooper里边message被处理完毕之后就会停掉整个service
+        stopSelf(msg.arg1);
+    }
 }
-}
-</code></pre><p><code>/**
-这个方法是在工作线程中被调用，并且传递了相关的请求参数，同一时间只有一个intent被处理，但是这个过程是在一个单独的工作线程中运行，所以，如果这些代码*会运行很久的话，它会阻塞其他发送到这个intentservice中的请求，当所有请求都被处理之后intentserice会停掉自己，所以不要手动调动stopSelf.*这个方法中的intent参数就是startService(intent)中的参数
+</code></pre><p>onHandleIntent是个抽象方法需要被子类实现，来进行那些需要在非UI线程执行的代码</p>
+<pre><code>/**
+这个方法是在工作线程中被调用，并且传递了相关的请求参数，同一时间只有一个intent被处理，但是这个过程是在一个单独的工作线程中运行，所以，如果这些代码会运行很久的话，它会阻塞其他发送到这个intentservice中的请求，当所有请求都被处理之后intentserice会停掉自己，所以不要手动调动stopSelf.这个方法中的intent参数就是startService(intent)中的参数
 */
-protected abstract void onHandleIntent(Intent intent);</code><br>onHandleIntent是个抽象方法需要被子类实现，来进行那些需要在非UI线程执行的代码</p>
+protected abstract void onHandleIntent(Intent intent);`
+</code></pre><p>在onStart里边将intent和startId发送到MessageLooper里边处理</p>
 <pre><code>@Override
 public void onStart(Intent intent, int startId) {
     Message msg = mServiceHandler.obtainMessage();
     msg.arg1 = startId;
     msg.obj = intent;
     mServiceHandler.sendMessage(msg);
-}
-</code></pre><p>在onstart里边将intent和startId发送到MessageLooper里边处理</p>
-<pre><code>/**
+}    
+/**
 不要重写此方法，
 */
 @Override
-public int onStartCommand(Intent intent, int flags,     int startId) {
+public int onStartCommand(Intent intent, int flags, int startId) {
     onStart(intent, startId);
-    return mRedelivery ? START_REDELIVER_INTENT :         START_NOT_STICKY;
+    return mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY;
 }
-</code></pre><p>/**</p>
-<ul>
-<li>Sets intent redelivery preferences. Usually called from the constructor</li>
-<li>with your preferred semantics.<br>*</li>
-<li><p>If enabled is true,</p></li>
-<li>{@link #onStartCommand(Intent, int, int)} will return</li>
-<li>{@link Service#START_REDELIVER_INTENT}, so if this process dies before</li>
-<li>{@link #onHandleIntent(Intent)} returns, the process will be restarted</li>
-<li>and the intent redelivered. If multiple Intents have been sent, only</li>
-<li>the most recent one is guaranteed to be redelivered.<br>*</li>
-<li><p>If enabled is false (the default),</p></li>
-<li>{@link #onStartCommand(Intent, int, int)} will return</li>
-<li>{@link Service#START_NOT_STICKY}, and if the process dies, the Intent</li>
-<li>dies along with it.<br>设置为true,onStartCommand()会返回START_REDELIVER_INTENT,然后如果进程在onHandleIntent()返回之前死掉了，进程会重新启动同时intent会被重新传入，如果提交了多个intents，只有最近的那个可以保证重新传入</li>
-</ul>
-<p>设置为false,onStartCommand()返回START_NOT+STICKY,如果进程死掉，intent也就陪葬了<br>*/<br>public void setIntentRedelivery(boolean enabled) {<br>    mRedelivery = enabled;<br>}</p>
-<p>/<em>*<br>START_STICKY的兼容版本，不保证进程被杀掉之后onStartCommand会被再次调用
+
+/**设置为true,onStartCommand()会返回START_REDELIVER_INTENT,然后如果进程在onHandleIntent()返回之前死掉了，进程会重新启动同时intent会被重新传入，如果提交了多个intents，只有最近的那个可以保证重新传入
+设置为false,onStartCommand()返回START_NOT_STICKY,如果进程死掉，intent也就陪葬了
+*/
+public void setIntentRedelivery(boolean enabled) {
+    mRedelivery = enabled;
+}
+</code></pre><p>onStartCommand中返回值含义：<br>/<em>*<br>START_STICKY的兼容版本，不保证进程被杀掉之后onStartCommand会被再次调用
 </em>/<br>public static final int START_STICKY_COMPATIBILITY = 0;</p>
 <p>/<em>*<br>如果服务进程被杀掉，当它启动后（在onStartCommand返回后）会处于started状态而不重新持有传入的intent,之后系统会尝试重新生成service.因为它处于started状态，它会保证在生成新的service实例之后调用onstartCommand，如果在此期间没有任何启动命令被传递到,它被调用的时候会被传入一个null的intent，所以得小心。<br>这种模式对那些任意时候明确开始或停止的有意义，比如执行背景音乐重复的service
-</em>/<br>public static final int START_STICKY = 1;</p>
-<p>/**</p>
-<ul>
-<li><p>This mode makes sense for things that want to do some work as a</p></li>
-<li>result of being started, but can be stopped when under memory pressure</li>
-<li>and will explicit start themselves again later to do more work. An</li>
-<li>example of such a service would be one that polls for data from</li>
-<li>a server: it could schedule an alarm to poll every N minutes by having</li>
-<li>the alarm start its service. When its {@link #onStartCommand} is</li>
-<li>called from the alarm, it schedules a new alarm for N minutes later,</li>
-<li>and spawns a thread to do its networking. If its process is killed</li>
-<li>while doing that check, the service will not be restarted until the</li>
-<li>alarm goes off.<br>如果服务进程被杀掉，当它启动后（在onStartCommand返回后）没有新的start intents传递给它，然后使service处于非started状态而且不会重启直到startService(intent)明确的被调用,这个service不会调用参数为null的intentg的onStartCommand方法，因为如果没有pending intent传入的话，它不会重启。</li>
-</ul>
-<p>*/<br>public static final int START_NOT_STICKY = 2;</p>
-<p>/**</p>
-<ul>
-<li>Constant to return from {@link #onStartCommand}: if this service’s</li>
-<li>process is killed while it is started (after returning from</li>
-<li>{@link #onStartCommand}), then it will be scheduled for a restart</li>
-<li>and the last delivered Intent re-delivered to it again via</li>
-<li>{@link #onStartCommand}. This Intent will remain scheduled for</li>
-<li>redelivery until the service calls {@link #stopSelf(int)} with the</li>
-<li>start ID provided to {@link #onStartCommand}. The</li>
-<li>service will not receive a {@link #onStartCommand(Intent, int, int)}</li>
-<li>call with a null Intent because it will will only be re-started if</li>
-<li>it is not finished processing all Intents sent to it (and any such</li>
-<li>pending events will be delivered at the point of restart).<br>如果服务进程被杀掉，当它启动后（在onStartCommand返回后）它会被有计划的重启，而且最后传入的intent会在onStartComman中重新传入。</li>
-</ul>
-<p>*/<br>public static final int START_REDELIVER_INTENT = 3;</p>
+</em>/</p>
+<p>public static final int START_STICKY = 1;</p>
+<p>/**<br>如果服务进程被杀掉，当它启动后（在onStartCommand返回后）没有新的start intents传递给它，然后使service处于非started状态而且不会重启直到startService(intent)明确的被调用,这个service不会调用参数为null的intent的onStartCommand方法，因为如果没有pending intent传入的话，它不会重启。</p>
+<p>这种模式对要做一些工作来作为开始的结果是有意义的，但是当内存不足的时候有可能停止并且会在过后明确的开始他们来做更多的工作。一个从service获取数据例子：可以schedule一个alarm每隔N分钟通过alarm启动它的servide来获取数据,当它的onStartCommand从alarm调用，它会schedules一个新的N分钟之后响起的alarm，并且产生一个线程来做网络操作。当检查的时候如果它的进程被杀掉，service不会重启直到alarm响起。<br>*/</p>
+<p>public static final int START_NOT_STICKY = 2;</p>
+<p>/<em>*<br>如果服务进程被杀掉，当它启动后（在onStartCommand返回后）它会被有计划的重启，而且最后传入的intent会在onStartComman中重新传入。<br>如果这个service的进程当他开始之后（在onStartCommand返回之后）被杀死，然后它会scheduled一个重启并且最后传入的Intent会通过onStartCommand被重新传入.这个Intent会依然保留scheduled重传直到service调用带有由onStartCommand提供的start ID作为参数的stopSelf。service不会收到一个带有Intent值为null的onStartComman(Intent, int, int)因为他只会因为它还没有结束处理发给它的所有Intents而重启（而且任何pending events都会在重新开始的时候传入）
+</em>/</p>
+<p>public static final int START_REDELIVER_INTENT = 3;</p>
+<p>IntentService的onDestroy退出looper</p>
 <pre><code>@Override
 public void onDestroy() {
     //Looper退出
     mServiceLooper.quit();
 }
 </code></pre><hr>
-<p>###HandlerThread<br>在IntentService中的工作线程是通过HandlerThread实现，HanderThread是一个拥有looper的线程，这个loooper可以用来创建Handler类，start()方法必须被调用。</p>
+<p>###HandlerThread</p>
+<blockquote>
+<p>在IntentService中的工作线程是通过HandlerThread实现，HanderThread是一个拥有looper的线程，这个loooper可以用来创建Handler类，start()方法必须被调用。</p>
+</blockquote>
 <pre><code>public HandlerThread(String name) {
     super(name);
     //赋予默认的线程优先级
@@ -381,10 +361,10 @@ public HandlerThread(String name, int priority) {
 public void run() {
     mTid = Process.myTid();
     Looper.prepare();
-    synchronized (this) {
-    mLooper = Looper.myLooper();
-    //这个notifyAll会唤醒等待获取looper的方法（getLooper（）        //中）
-    notifyAll();
+    synchronized (this) {//做了同步处理
+        mLooper = Looper.myLooper();
+        //这个notifyAll会唤醒等待获取looper的方法（getLooper（）中）
+        notifyAll();
     }
     Process.setThreadPriority(mPriority);
     onLooperPrepared();
@@ -393,42 +373,42 @@ public void run() {
 }
 </code></pre><p>在run里边将该线程初始化为Looper,设置优先级，然后循环message队列</p>
 <pre><code>/**
-回调方法：在looper loops之前的一些准备操作可以通过重写这个方    法来完成
+回调方法：在looper loops之前的一些准备操作可以通过重写这个方法来完成
 */
 protected void onLooperPrepared() {    
 }
-
-/**
+</code></pre><p>Handler退出Looper</p>
+<pre><code>/**
 退出handler线程的looper
 调用这个方法会中断handler thread的looper,使message queue    里边的所有message都不再运行
 在looper被停止之后，任何尝试提交给queue的messages都会失败
-调用这个方法有时不安全，因为有些message在looper中断之前不会再    被传递，考虑使用quitSafely来代替以确保所有待执行的任务有序的执    行
+调用这个方法有时不安全，因为有些message在looper中断之前不会再被传递，考虑使用quitSafely来代替以确保所有待执行的任务有序的执行
 */
 public boolean quit() {
     Looper looper = getLooper();
     if (looper != null) {
-    looper.quit();
-    return true;
+        looper.quit();
+        return true;
     }
     return false;
 }`
 
 /**
 安全的退出handler线程的looper
-当所有在messagequeue里边的messages都被执行之后handler 线程    的looper才会中断，那些延迟执行messages的都不会再执行
+当所有在messagequeue里边的messages都被执行之后handler线程的looper才会中断，那些延迟执行messages的都不会再执行
 */
 public boolean quitSafely() {
     Looper looper = getLooper();
     if (looper != null) {
-    looper.quitSafely();
-    return true;
+        looper.quitSafely();
+        return true;
     }
     return false;
 }
 
 /**
 返回这个线程关联的looper
-如果线程没有开始或因为某些原因isAlive（）returns false,这个    方法会返回null，如果这个线程已经开始，这个方法会阻塞直到looper    被初始化
+如果线程没有开始或因为某些原因isAlive（）returns false,这个方法会返回null，如果这个线程已经开始，这个方法会阻塞直到looper被初始化
 */
 public Looper getLooper() {
     if (!isAlive()) {
@@ -439,11 +419,11 @@ public Looper getLooper() {
         while (isAlive() &amp;&amp; mLooper == null) {
             try {
                 wait();
-            } catch (InterruptedException e) {
+                } catch (InterruptedException e) {
+            }
         }
     }
-}
-return mLooper;
+    return mLooper;
 }
 </code></pre><p><strong>综上呢，IntentService继承制Service,内部通过HandlerThread来创建线程和在该线程中生成的Looper完成Handler的消息处理，处理完毕所有通过startService中传入的intent之后就会结束自己。可以通过重写IntentService的onStart方法来改变handler处理message的方式，比如延时</strong></p>
 </span>
@@ -451,6 +431,14 @@ return mLooper;
     </div>
 
     <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/HandlerThread/" rel="tag">#HandlerThread</a>
+          
+            <a href="/tags/IntentService/" rel="tag">#IntentService</a>
+          
+        </div>
       
 
       
@@ -476,8 +464,8 @@ return mLooper;
         
   <div class="comments" id="comments">
     
-      <div class="ds-thread" data-thread-key="2015/12/30/IntentServiceHandlerThread/"
-           data-title="IntentService & HandlerThread源码解析" data-url="http://yoursite.com/2015/12/30/IntentServiceHandlerThread/">
+      <div class="ds-thread" data-thread-key="2015/12/31/IntentServiceHandlerThread/"
+           data-title="IntentService & HandlerThread源码解析" data-url="http://yoursite.com/2015/12/31/IntentServiceHandlerThread/">
       </div>
     
   </div>
@@ -535,7 +523,7 @@ return mLooper;
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-count">2</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>
