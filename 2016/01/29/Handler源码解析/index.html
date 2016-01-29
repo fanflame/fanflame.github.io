@@ -35,7 +35,7 @@
 <link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="handler," />
 
 
 
@@ -51,15 +51,16 @@
 
 
 
-<meta name="description" content="fanyiran">
-<meta property="og:type" content="website">
-<meta property="og:title" content="梵依然">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="Handler/**Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Handler，Message，MessageQueue，Looper源码解析">
+<meta property="og:url" content="http://yoursite.com/2016/01/29/Handler源码解析/index.html">
 <meta property="og:site_name" content="梵依然">
-<meta property="og:description" content="fanyiran">
+<meta property="og:description" content="Handler/**Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从">
+<meta property="og:updated_time" content="2016-01-29T16:40:08.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="梵依然">
-<meta name="twitter:description" content="fanyiran">
+<meta name="twitter:title" content="Handler，Message，MessageQueue，Looper源码解析">
+<meta name="twitter:description" content="Handler/**Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从">
 
 
 
@@ -71,7 +72,7 @@
   };
 </script>
 
-  <title> 梵依然 </title>
+  <title> Handler，Message，MessageQueue，Looper源码解析 | 梵依然 </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -102,9 +103,7 @@
 
 
 
-  <div class="container one-column 
-   page-home 
-">
+  <div class="container one-column page-post-detail">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -191,15 +190,9 @@
       <div class="main-inner">
         <div id="content" class="content">
           
-  <section id="posts" class="posts-expand">
 
+  <div id="posts" class="posts-expand">
     
-
-    
-    
-
-    
-      
 
   
   
@@ -219,10 +212,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/01/29/Handler源码解析/" itemprop="url">
-                  Handler，Message，MessageQueue，Looper源码解析
-                </a>
+                Handler，Message，MessageQueue，Looper源码解析
               
             
           </h1>
@@ -262,10 +252,7 @@
       
 
       
-        
-          <span itemprop="articleBody">
-            
-              <h3 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h3><p>/**<br>Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。<br>当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从message queue中取出来执行他们。</p>
+        <span itemprop="articleBody"><h3 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h3><p>/**<br>Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。<br>当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从message queue中取出来执行他们。</p>
 <p>有两个主要用途1.调度messages和runnables在将来的某个时间点执行。2.在不同于你的线程里插入一个action等待被执行</p>
 <p>messages通过调用post，postAtTime(Runnable, long)，postDelayed，sendEmptyMessage，sendMessage，sendMessageAtTime，sendMessageDelayed这些方法来完成。<br>post系列方法允许在message queue中排列等待被调用Runnable对象；sendMessage系列方法允许排列那些将在Handler的handleMessage方法（前提是子类化了Handler）中被执行的包含bundle数据的message对象</p>
 <p>当提交给handler,可以在message queue准备完毕之后立刻执行，或者指定一个延迟时间再执行，或绝对时间再执行。对于后两者，可以实现超时,ticks, 和其他基于时间的行为.</p>
@@ -325,433 +312,46 @@
 <figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// sThreadLocal.get() 会返回null,除非我们已经调用了prepare()</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">final</span> ThreadLocal&lt;Looper&gt; sThreadLocal = <span class="keyword">new</span> ThreadLocal&lt;Looper&gt;();</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Looper sMainLooper; <span class="comment">// 由 Looper.class管理</span></span><br><span class="line"></span><br><span class="line"><span class="comment">/** </span><br><span class="line">初始化当前线程为一个looper,这个函数给你一个创建引用这个looper的handlers的机会</span><br><span class="line">在真正开始loop之前，请确保调用</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	prepare(<span class="keyword">true</span>);<span class="comment">//默认是允许退出loop的</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepare</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (sThreadLocal.get() != <span class="keyword">null</span>) &#123;<span class="comment">//确保一个线程只有一个Looper</span></span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Only one Looper may be created per thread"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	sThreadLocal.set(<span class="keyword">new</span> Looper(quitAllowed));</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">private</span> <span class="title">Looper</span><span class="params">(<span class="keyword">boolean</span> quitAllowed)</span> </span>&#123;</span><br><span class="line">	mQueue = <span class="keyword">new</span> MessageQueue(quitAllowed);</span><br><span class="line">	mThread = Thread.currentThread();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line">初始化当前线程为一个looper,并且让它做为一个应用的主looper. 应用的主looper是被Android环境创建，所以你永远不需要调用这个方法，</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">prepareMainLooper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	prepare(<span class="keyword">false</span>);<span class="comment">//主looper是不允许退出的。</span></span><br><span class="line">	<span class="keyword">synchronized</span> (Looper.class) &#123;</span><br><span class="line">		<span class="keyword">if</span> (sMainLooper != <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"The main Looper has already been prepared."</span>);</span><br><span class="line">		&#125;</span><br><span class="line">		sMainLooper = myLooper();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line">返回当前线程相关联的Looper对象，如果调用这个方法的线程没有关联一个Looper返回null</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function">Looper <span class="title">myLooper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">return</span> sThreadLocal.<span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line">* 返回和当前线程相关联的MessageQueue.必须在运行Looper的线程调用，否则抛出空指针异常。</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function">MessageQueue <span class="title">myQueue</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">return</span> myLooper().mQueue;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** </span><br><span class="line">返回应用的主looper,这个looper存在于应用的主线程</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function">Looper <span class="title">getMainLooper</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">synchronized</span> (Looper.class) &#123;</span><br><span class="line">	    <span class="keyword">return</span> sMainLooper;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">/**</span><br><span class="line">在这个线程运行message queue。确定调用quit来终止loop</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">loop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="keyword">final</span> Looper me = myLooper();</span><br><span class="line">	<span class="keyword">if</span> (me == <span class="keyword">null</span>) &#123;</span><br><span class="line">		<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"No Looper; Looper.prepare() wasn't called on this thread."</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">final</span> MessageQueue queue = me.mQueue;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">	<span class="comment">// 确保这个线程的身份是本地进程的。并且跟踪身份的token值的真实值</span></span><br><span class="line">	Binder.clearCallingIdentity();</span><br><span class="line">	<span class="keyword">final</span> <span class="keyword">long</span> ident = Binder.clearCallingIdentity();</span><br><span class="line"></span><br><span class="line">	<span class="keyword">for</span> (;;) &#123;</span><br><span class="line">		Message msg = queue.next(); <span class="comment">// 有可能阻塞</span></span><br><span class="line">		<span class="keyword">if</span> (msg == <span class="keyword">null</span>) &#123;</span><br><span class="line">			<span class="comment">// 没有message表明message queue正在退出</span></span><br><span class="line">			<span class="keyword">return</span>;</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 这必须是个本地变量，防止一个UI事件设置logger.</span></span><br><span class="line">		Printer logging = me.mLogging;</span><br><span class="line">		<span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">			logging.println(<span class="string">"&gt;&gt;&gt;&gt;&gt; Dispatching to "</span> + msg.<span class="keyword">target</span> + <span class="string">" "</span> +</span><br><span class="line">			msg.callback + <span class="string">": "</span> + msg.what);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		msg.<span class="keyword">target</span>.dispatchMessage(msg);</span><br><span class="line"></span><br><span class="line">		<span class="keyword">if</span> (logging != <span class="keyword">null</span>) &#123;</span><br><span class="line">			logging.println(<span class="string">"&lt;&lt;&lt;&lt;&lt; Finished to "</span> + msg.<span class="keyword">target</span> + <span class="string">" "</span> + msg.callback);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		<span class="comment">// 确保这调度过程中，确保线程的身份没有被损坏</span></span><br><span class="line">		<span class="keyword">final</span> <span class="keyword">long</span> newIdent = Binder.clearCallingIdentity();</span><br><span class="line">		<span class="keyword">if</span> (ident != newIdent) &#123;</span><br><span class="line">			Log.wtf(TAG, <span class="string">"Thread identity changed from 0x"</span></span><br><span class="line">			+ Long.toHexString(ident) + <span class="string">" to 0x"</span></span><br><span class="line">			+ Long.toHexString(newIdent) + <span class="string">" while dispatching to "</span></span><br><span class="line">			+ msg.<span class="keyword">target</span>.getClass().getName() + <span class="string">" "</span></span><br><span class="line">			+ msg.callback + <span class="string">" what="</span> + msg.what);</span><br><span class="line">		&#125;</span><br><span class="line"></span><br><span class="line">		msg.recycle();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">/<span class="keyword">*</span><span class="keyword">*</span></span><br><span class="line">提交一个同步的barrier到Looper的message queue</span><br><span class="line">message的处理像平常一样发生直到message queue遇到同步的barrier被提交.当遇到barrier,后来的queue中同步的messages会被暂缓（防止被执行），直到调用remveSyncBarrier释放barrier并在释放的时候指定能够识别同步barrier的token</span><br><span class="line"><span class="keyword">*</span>age的执行直到释放barrier.异步的messages不受影响，继续按通常一样运行。</span><br><span class="line"><span class="keyword">*</span></span><br><span class="line"><span class="keyword">*</span>这次必须和调用removeSyncBarrier配对调用，而且使用相同的token来确保message queue回复正常运行。否则应用有可能会挂起</span><br><span class="line"><span class="keyword">*</span>返回唯一的标示barrier的taken</span><br><span class="line"><span class="keyword">*</span> <span class="comment">@hide</span></span><br><span class="line"><span class="keyword">*</span>/</span><br><span class="line">public int postSyncBarrier() &#123;</span><br><span class="line">	return mQueue.enqueueSyncBarrier(SystemClock.uptimeMillis());</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">/<span class="keyword">*</span><span class="keyword">*</span></span><br><span class="line"><span class="keyword">*</span> <span class="comment">@hide</span></span><br><span class="line"><span class="keyword">*</span>/</span><br><span class="line">public void removeSyncBarrier(int token) &#123;</span><br><span class="line">	mQueue.removeSyncBarrier(token);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>简单来说首先需要Looper.prepare()来初始化当前线程中的Looper，并放置到Looper的静态ThreadLocal<looper>中，并初始化一个空的MessageQueue。然后新建一个Handler，在Handler的构造过程中，获取到该线程的Looper和Looper相对应的MessageQueue。然后调用Looper.loop()。这时候从Handler 通过MessageQueue的enqueueMessage提交message，并设置message的target为本Handler。然后在loop（）中调用MessageQueue的next（）获取到下一个该处理的message，调用message的target来执行最后操作，完毕之后msg被回收。</looper></p>
-
-            
-          </span>
-        
+</span>
       
     </div>
 
     <footer class="post-footer">
       
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/06/AsyncTask源码解析/" itemprop="url">
-                  AsyncTask源码解析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2016-01-06T06:00:07+08:00" content="2016-01-06">
-              2016-01-06
-            </time>
-          </span>
-
+        <div class="post-tags">
           
-
+            <a href="/tags/handler/" rel="tag">#handler</a>
           
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/01/06/AsyncTask源码解析/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/06/AsyncTask源码解析/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
         </div>
-      </header>
-    
-
-
-    <div class="post-body">
-
-      
       
 
       
-        
-          <span itemprop="articleBody">
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
             
-              <p>本代码基于sdk4.0</p>
-<p>AsyncTask适合在UI线程中使用并且非常简单，这个类允许执行后台操作并且在UI线程发布结果，不必直接操作线程或者handler</p>
-<p>AsyncTask被设计为一个Thread和Handler的帮助类，不用构成一个通用线程框架。AsyncTasks理论上是用来进行短时间的操作（最多几秒钟，生命周期一般要与activity或fragment绑定）。如果想使线程长时间执行操作，强烈建议使用java.util.concurrent包比如Executor,ThreadPoolExecutor和FutureTask.</p>
-<p>一个异步任务被设想设计为在后台运行的线程而且结果会发布在UI线程。<br>三种类型 Params,Progress,Result,4个方法onPreExecute，doInBackground，onProgressUpdate<br>，onPostExecute</p>
-<h4 id="u4E00_u4E2A_u7B80_u5355_u7684_u4F8B_u5B50_uFF1A"><a href="#u4E00_u4E2A_u7B80_u5355_u7684_u4F8B_u5B50_uFF1A" class="headerlink" title="一个简单的例子："></a>一个简单的例子：</h4><figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">private class <span class="type">DownloadFilesTask</span> extends <span class="type">AsyncTask</span>&lt;<span class="type">URL</span>, <span class="type">Integer</span>, <span class="type">Long</span>&gt; &#123;</span><br><span class="line">	protected <span class="type">Long</span> doInBackground(<span class="type">URL</span>... urls) &#123;</span><br><span class="line">		<span class="type">int</span> count = urls.length;</span><br><span class="line">		long totalSize = <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</span><br><span class="line">			totalSize += <span class="type">Downloader</span>.downloadFile(urls[i]);</span><br><span class="line">			publishProgress((<span class="type">int</span>) ((i / (<span class="type">float</span>) count)   <span class="number">100</span>));//发布进度</span><br><span class="line">			<span class="keyword">if</span> (isCancelled()) <span class="keyword">break</span>;//检查是否应该取消</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> totalSize;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	protected <span class="type">void</span> onProgressUpdate(<span class="type">Integer</span>... progress) &#123;</span><br><span class="line">		setProgressPercent(progress[<span class="number">0</span>]);</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	protected <span class="type">void</span> onPostExecute(<span class="type">Long</span> <span class="literal">result</span>) &#123;</span><br><span class="line">		showDialog(<span class="string">"Downloaded "</span> + <span class="literal">result</span> + <span class="string">" bytes"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h4 id="u5982_u4F55_u5F00_u59CB_u4E00_u4E2A_u4EFB_u52A1"><a href="#u5982_u4F55_u5F00_u59CB_u4E00_u4E2A_u4EFB_u52A1" class="headerlink" title="如何开始一个任务"></a>如何开始一个任务</h4><p>new DownloadFilesTask().execute(url1, url2, url3);</p>
-<h4 id="AsyncTask_u901A_u5E38_u7684_u4E09_u4E2A_u7C7B_u578B"><a href="#AsyncTask_u901A_u5E38_u7684_u4E09_u4E2A_u7C7B_u578B" class="headerlink" title="AsyncTask通常的三个类型"></a>AsyncTask通常的三个类型</h4><ul>
-<li>Params参数类型</li>
-<li>Progress在后台计算过程中发布的进度单位类型</li>
-<li>Result后台计算的结果类型</li>
-</ul>
-<p>以上三种类型通常都会被在异步任务中使用，通过设置为Void标记为不使用</p>
-<p>  private class MyTask extends AsyncTask&lt;Void, Void, Void&gt; { … } </p>
-<h4 id="u56DB_u4E2A_u6B65_u9AA4"><a href="#u56DB_u4E2A_u6B65_u9AA4" class="headerlink" title="四个步骤"></a>四个步骤</h4><ul>
-<li>onPreExecute()}在任务执行之前在UI线程调用，通常为任务做些准备比如显示一个进度条</li>
-<li>doInBackground在onPreExecute之后立刻在后台线程中运行，参数会被传到这个方法 ，计算结果必须返回，而且最终会传递到最后一步 ，这一步可以使用publishProgress来发布一次或多次进度 ，这些进度值都会被发布到UI线程（在onProgressUpdate这步）</li>
-<li>onProgressUpdate在pulishProgress之后在UI线程调用,这个方法用来当后台计算还在执行的时候在UI线程展示进度 ，比如可以改变进度条进度或者在一个text域展示日志 </li>
-<li>onPostExecute后台计算完成之后在UI线程调用,后台计算的结果会以参数形式传到这一步</li>
-</ul>
-<h4 id="u53D6_u6D88_u4E00_u4E2A_u4EFB_u52A1"><a href="#u53D6_u6D88_u4E00_u4E2A_u4EFB_u52A1" class="headerlink" title="取消一个任务"></a>取消一个任务</h4><p>一个任务可以随时通过调用cancel(boolean)来取消，调用这个方法会是接下来的isCancelled返回true,调用这个方法之后onCancelled(Object)会替代onPostExecute(Object)在doInBackgroud(Object[])返回之后执行。为了确保一个任务能尽快被取消，应该在doInBackgroud(Object[])中周期的检查isCancelled()的值（比如说在循环中）</p>
-<h4 id="u7EBF_u7A0B_u89C4_u5219"><a href="#u7EBF_u7A0B_u89C4_u5219" class="headerlink" title="线程规则"></a>线程规则</h4><p>为了使任务更好的工作，必须遵循以下规则</p>
-<ul>
-<li>AsyncTask必须在UI线程加载，在JELLY_BEAN版本会被自动完成。</li>
-<li>任务实例必须在UI线程创建</li>
-<li>execute必须在UI线程调用</li>
-<li>不要手动调用onPreExecute，onPostExecute，doInBackground，onProgressUpdate</li>
-<li>任务只能执行一次，否则会抛出一个异常</li>
-</ul>
-<p>AsyncTask确保所有的回调都是同步的，在没有显示同步情况下是安全的</p>
-<h4 id="u6267_u884C_u987A_u5E8F"><a href="#u6267_u884C_u987A_u5E8F" class="headerlink" title="执行顺序"></a>执行顺序</h4><p>一开始AsyncTasks是在一个单独的后台线程中执行，在DONUT版本之后，变为在一个允许多个任务并行运行的线程池中。在HONEYCOMB版本之后，任务会在一个单独的线程中来避免并行执行引起的应用错误</p>
-<p>如果确实想要并行的执行，调用executeOnExecutor(java.util.concurrent.Executor, Object[])和THREAD_POOL_EXECUTOR</p>
-<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//获取cpu数量</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CPU_COUNT = <span class="keyword">Runtime</span>.getRuntime().availableProcessors();</span><br><span class="line"></span><br><span class="line"><span class="comment">//池中核心线程数量</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CORE_POOL_SIZE = CPU_COUNT + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//池中最大线程数量</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_POOL_SIZE = CPU_COUNT＊<span class="number">2</span> + <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">//提供的默认线程池</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor THREAD_POOL_EXECUTOR</span><br><span class="line">= <span class="keyword">new</span> ThreadPoolExecutor(CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE,</span><br><span class="line">TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);</span><br><span class="line"></span><br><span class="line"><span class="comment">//最大支持128个长度</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> BlockingQueue&lt;Runnable&gt; sPoolWorkQueue =</span><br><span class="line"><span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(<span class="number">128</span>);</span><br><span class="line"><span class="comment">/*</span><br><span class="line">  在同一时间按序执行。对某一个进程来说这个串行时全局的。</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> Executor SERIAL_EXECUTOR = <span class="keyword">new</span> SerialExecutor();</span><br></pre></td></tr></table></figure>
-<p>SerialExecutor的实现如下</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">SerialExecutor</span> <span class="keyword">implements</span> <span class="title">Executor</span> </span>&#123;</span><br><span class="line">	<span class="keyword">final</span> ArrayDeque&lt;Runnable&gt; mTasks = <span class="keyword">new</span> ArrayDeque&lt;Runnable&gt;();</span><br><span class="line">	Runnable mActive;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">execute</span><span class="params">(<span class="keyword">final</span> Runnable r)</span> </span>&#123;</span><br><span class="line">		mTasks.offer(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">			<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">				<span class="keyword">try</span> &#123;</span><br><span class="line">					r.run();</span><br><span class="line">				&#125; <span class="keyword">finally</span> &#123;</span><br><span class="line">					scheduleNext();</span><br><span class="line">				&#125;</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;);</span><br><span class="line">		<span class="keyword">if</span> (mActive == <span class="keyword">null</span>) &#123;<span class="comment">//为空的时候才执行下一个，不为空只是插入。</span></span><br><span class="line">			scheduleNext();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="function"><span class="keyword">protected</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title">scheduleNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span> ((mActive = mTasks.poll()) != <span class="keyword">null</span>) &#123;</span><br><span class="line">			THREAD_POOL_EXECUTOR.execute(mActive);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/＊<span class="annotation">@hide</span> 强制创建静态的handle ＊/</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">init</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	sHandler.getLooper();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">volatile</span> Executor sDefaultExecutor = SERIAL_EXECUTOR;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> WorkerRunnable&lt;Params, Result&gt; mWorker;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">final</span> FutureTask&lt;Result&gt; mFuture;</span><br></pre></td></tr></table></figure>
-<p>其中sThreadFactory的实现</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ThreadFactory sThreadFactory = <span class="keyword">new</span> ThreadFactory() &#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> AtomicInteger mCount = <span class="keyword">new</span> AtomicInteger(<span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">public</span> <span class="function">Thread <span class="title">newThread</span><span class="params">(Runnable r)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Thread(r, <span class="string">"AsyncTask #"</span> + mCount.getAndIncrement());</span><br><span class="line">	&#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">  构造函数，必须在UI线程调用</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">AsyncTask</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	mWorker = <span class="keyword">new</span> WorkerRunnable&lt;Params, Result&gt;() &#123;</span><br><span class="line">		<span class="keyword">public</span> <span class="function">Result <span class="title">call</span><span class="params">()</span> <span class="keyword">throws</span> Exception </span>&#123;</span><br><span class="line">			mTaskInvoked.set(<span class="keyword">true</span>);</span><br><span class="line"></span><br><span class="line">			Process.setThreadPriority(Process.THREAD_PRIORITY_BACKGROUND);</span><br><span class="line">			<span class="comment">//noinspection unchecked</span></span><br><span class="line">			<span class="keyword">return</span> postResult(doInBackground(mParams));</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br><span class="line"></span><br><span class="line">	mFuture = <span class="keyword">new</span> FutureTask&lt;Result&gt;(mWorker) &#123;</span><br><span class="line">		<span class="annotation">@Override</span></span><br><span class="line">		<span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">done</span><span class="params">()</span> </span>&#123;</span><br><span class="line">			<span class="keyword">try</span> &#123;</span><br><span class="line">				postResultIfNotInvoked(get());</span><br><span class="line">			&#125; <span class="keyword">catch</span> (InterruptedException e) &#123;</span><br><span class="line">				android.util.Log.w(LOG_TAG, e);</span><br><span class="line">			&#125; <span class="keyword">catch</span> (ExecutionException e) &#123;</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"An error occured while executing doInBackground()"</span>,</span><br><span class="line">				e.getCause());</span><br><span class="line">			&#125; <span class="keyword">catch</span> (CancellationException e) &#123;</span><br><span class="line">				postResultIfNotInvoked(<span class="keyword">null</span>);</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>WorkerRunnable静态抽象内部类</p>
-<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> static <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">WorkerRunnable</span><span class="inheritance">&lt;<span class="parent">Params</span></span>, <span class="title">Result</span>&gt; <span class="title">implements</span> <span class="title">Callable</span><span class="inheritance">&lt;<span class="parent">Result</span></span>&gt; &#123;</span></span><br><span class="line">	<span class="constant">Params</span>[] mParams;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/* </span><br><span class="line">这个方法依据平台的版本在一个单独后台线程或线程池中安排队列中的任务</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> final AsyncTask&lt;<span class="keyword">Params</span>, Progress, Result&gt; execute(<span class="keyword">Params</span><span class="attribute">...</span> <span class="keyword">params</span>) &#123;</span><br><span class="line">	<span class="keyword">return</span> executeOnExecut<span class="subst">or</span>(sDefaultExecut<span class="subst">or</span>, <span class="keyword">params</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private <span class="type">Result</span> postResult(<span class="type">Result</span> <span class="literal">result</span>) &#123;</span><br><span class="line">	@<span class="type">SuppressWarnings</span>(<span class="string">"unchecked"</span>)</span><br><span class="line">	<span class="type">Message</span> message = sHandler.obtainMessage(<span class="type">MESSAGE_POST_RESULT</span>,</span><br><span class="line">	new <span class="type">AsyncTaskResult</span>&lt;<span class="type">Result</span>&gt;(this, <span class="literal">result</span>));</span><br><span class="line">	message.sendToTarget();</span><br><span class="line">	<span class="keyword">return</span> <span class="literal">result</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight fortran"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> static <span class="keyword">class</span> AsyncTaskResult&lt;<span class="type">Data</span>&gt; &#123;</span><br><span class="line">	<span class="keyword">final</span> AsyncTask mTask;</span><br><span class="line">	<span class="keyword">final</span> <span class="type">Data</span>[] mData;</span><br><span class="line"></span><br><span class="line">	AsyncTaskResult(AsyncTask task, <span class="type">Data</span>... <span class="type">data</span>) &#123;</span><br><span class="line">		mTask = task;</span><br><span class="line">		mData = <span class="type">data</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">protected abstract <span class="type">Result</span> doInBackground(<span class="type">Params</span>... params);</span><br><span class="line">protected <span class="type">void</span> onPreExecute() &#123;</span><br><span class="line">&#125;</span><br><span class="line">protected <span class="type">void</span> onPostExecute(<span class="type">Result</span> <span class="literal">result</span>) &#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">private <span class="type">void</span> postResultIfNotInvoked(<span class="type">Result</span> <span class="literal">result</span>) &#123;</span><br><span class="line">	final boolean wasTaskInvoked = mTaskInvoked.get();</span><br><span class="line">	<span class="keyword">if</span> (!wasTaskInvoked) &#123;</span><br><span class="line">		postResult(<span class="literal">result</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>私有静态final类<br>private static final InternalHandler sHandler = new InternalHandler();</p>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">private <span class="keyword">static</span> class <span class="type">InternalHandler</span> extends <span class="type">Handler</span> &#123;</span><br><span class="line">	@<span class="type">Override</span></span><br><span class="line">	public <span class="type">void</span> handleMessage(<span class="type">Message</span> msg) &#123;</span><br><span class="line">		<span class="type">AsyncTaskResult</span> <span class="literal">result</span> = (<span class="type">AsyncTaskResult</span>) msg.obj;</span><br><span class="line">		switch (msg.what) &#123;</span><br><span class="line">			<span class="keyword">case</span> <span class="type">MESSAGE_POST_RESULT</span>:</span><br><span class="line">			// <span class="type">There</span> <span class="keyword">is</span> only one <span class="literal">result</span></span><br><span class="line">			<span class="literal">result</span>.mTask.finish(<span class="literal">result</span>.mData[<span class="number">0</span>]);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">			<span class="keyword">case</span> <span class="type">MESSAGE_POST_PROGRESS</span>:</span><br><span class="line">			<span class="literal">result</span>.mTask.onProgressUpdate(<span class="literal">result</span>.mData);</span><br><span class="line">			<span class="keyword">break</span>;</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">private <span class="type">void</span> finish(<span class="type">Result</span> <span class="literal">result</span>) &#123;</span><br><span class="line">	<span class="keyword">if</span> (isCancelled()) &#123;</span><br><span class="line">		onCancelled(<span class="literal">result</span>);</span><br><span class="line">	&#125; <span class="keyword">else</span> &#123;</span><br><span class="line">		onPostExecute(<span class="literal">result</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	mStatus = <span class="type">Status</span>.<span class="type">FINISHED</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line"> 如果调用了cancel(boolean)这个方法，应该在doInBackground(Object[])中周期性的检查isCancelled()的返回值来尽早结束任务</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">boolean</span> <span class="title">isCancelled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">return</span> mCancelled.<span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">/* </span><br><span class="line">  在cancel(boolean)被调用和doInBackgroud(<span class="type">Object</span>[])完成之后在<span class="type">UI</span>线程执行</span><br><span class="line">默认的实现只是调用了onCancelled()同时忽略了结果。如果自己实现这个方法不要调用super.onCancelled(<span class="literal">result</span>)</span><br><span class="line"> */</span><br><span class="line">@<span class="type">SuppressWarnings</span>(&#123;<span class="string">"UnusedParameters"</span>&#125;)</span><br><span class="line">protected <span class="type">void</span> onCancelled(<span class="type">Result</span> <span class="literal">result</span>) &#123;</span><br><span class="line">	onCancelled();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*应用最好重写onCannelled(object)。这个方法默认是被onCancelled(object)方法调用</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">onCancelled</span><span class="params">()</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  </span><br><span class="line">在publishProgress执行之后在UI线程运行，参数值是从publishProgress中穿过来的</span><br><span class="line"> */</span></span><br><span class="line"><span class="annotation">@SuppressWarnings</span>(&#123;<span class="string">"UnusedDeclaration"</span>&#125;)</span><br><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">onProgressUpdate</span><span class="params">(Progress... values)</span> </span>&#123;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">尝试取消任务，如果任务已经完成或已经取消，或因为某些其他的原因不能取消都会导致这次尝试失败。如果成功了而且任务当被调用cancel的时候还没有开始，那么这个任务将不再执行。如果任务已经开始，那么mayInterruptIfRunning这个参数决定在这次停掉任务的尝试中是否使执行任务的线程中断。</span><br><span class="line">调用这个方法的结果将传递给在doInBackground(Object[])返回之后的UI线程中被调用的onCancelled(Object)。调用这个方法保证onPostExecute(Object)不被调用。</span><br><span class="line">调用这个方法之后，应该在doInBackground(Object[])中周期性的检查isCancelled()的返回值来尽早结束任务</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="function"><span class="keyword">boolean</span> <span class="title">cancel</span><span class="params">(<span class="keyword">boolean</span> mayInterruptIfRunning)</span> </span>&#123;</span><br><span class="line">	mCancelled.set(<span class="keyword">true</span>);</span><br><span class="line">	<span class="function"><span class="keyword">return</span> mFuture.<span class="title">cancel</span><span class="params">(mayInterruptIfRunning)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*当后台计算还在运行时在doInBackground中被调用来更新UI线程。每次调用这个方法都会触发UI线程的onProgressUpdate被执行</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">protected</span> <span class="keyword">final</span> <span class="function"><span class="keyword">void</span> <span class="title">publishProgress</span><span class="params">(Progress... values)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (!isCancelled()) &#123;</span><br><span class="line">		sHandler.obtainMessage(MESSAGE_POST_PROGRESS,</span><br><span class="line">		<span class="keyword">new</span> AsyncTaskResult&lt;Progress&gt;(<span class="keyword">this</span>, values)).sendToTarget();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  </span><br><span class="line">  execute(Object...)的一个方便版本，参数是一个简单的Runnable对象，</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="function"><span class="keyword">void</span> <span class="title">execute</span><span class="params">(Runnable runnable)</span> </span>&#123;</span><br><span class="line">	sDefaultExecutor.execute(runnable);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  </span><br><span class="line">这个方法通常使用THREAD_POOL_EXECUTOR在AsyncTask管理的线程池中并行的运行多个任务，但是也可以使用自定义的Executor</span><br><span class="line">注意：允许多个任务在一个线程池中并行通常不是你想要的，因为他们操作的顺序没有定义。比如如果这些线程用来修改通用的状态（比如由于按钮点击写一个文件），修改的顺序没有保证。</span><br><span class="line">如果不仔细对待这个问题，在最新版本中极少情况下数据将会被一个按顺序的重写，导致晦涩数据丢失和稳定性问题。</span><br><span class="line">所以这些修改最好串行来执行，如果不管平台的版本为保证这个任务是串行的，可以使用SERIAL_EXECUTOR作为参数</span><br><span class="line">必须在UI线程执行</span><br><span class="line">THREAD_POOL_EXECUTOR作为一个方便的全程的线程池对那些松耦合的任务是可用的</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> AsyncTask&lt;Params, Progress, Result&gt; executeOnExecutor(Executor exec,</span><br><span class="line">	Params... params) &#123;</span><br><span class="line">	<span class="keyword">if</span> (mStatus != Status.PENDING) &#123;<span class="comment">//所以只能运行一次呢。那把这个status判断去掉，就可以实现多次执行？</span></span><br><span class="line">		<span class="keyword">switch</span> (mStatus) &#123;</span><br><span class="line">			<span class="keyword">case</span> RUNNING:</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">				+ <span class="string">" the task is already running."</span>);</span><br><span class="line">			<span class="keyword">case</span> FINISHED:</span><br><span class="line">				<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">				+ <span class="string">" the task has already been executed "</span></span><br><span class="line">				+ <span class="string">"(a task can be executed only once)"</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	mStatus = Status.RUNNING;</span><br><span class="line">	onPreExecute();</span><br><span class="line">	mWorker.mParams = params;</span><br><span class="line">	exec.execute(mFuture);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*  </span><br><span class="line">在最需要的时间等待计算完成，然后检索结果</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="function">Result <span class="title">get</span><span class="params">(<span class="keyword">long</span> timeout, TimeUnit unit)</span> <span class="keyword">throws</span> InterruptedException,</span><br><span class="line">	ExecutionException, TimeoutException </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">return</span> mFuture.<span class="title">get</span><span class="params">(timeout, unit)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="function">Result <span class="title">get</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException, ExecutionException </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">return</span> mFuture.<span class="title">get</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>**综上，AsyncTask的流程：在构造函数里初始化一个可以返回结果的future，(future中处理和handle相关的操作)在调用execute时，调用默认的SerialExecutor(静态，该应用公用)在线程池中来线性执行添加的future。调用executeOnExecutor(Executor,Params)可以传入一个Executor来修改线程执行方式。</p>
-<p>###之前实现方式</p>
-<p>下面是基于sdk1.5 asyncTask的实现</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CORE_POOL_SIZE = <span class="number">1</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_POOL_SIZE = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> KEEP_ALIVE = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> BlockingQueue&lt;Runnable&gt; sWorkQueue =</span><br><span class="line"><span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(MAXIMUM_POOL_SIZE);</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ThreadPoolExecutor sExecutor = <span class="keyword">new</span> ThreadPoolExecutor(CORE_POOL_SIZE,</span><br><span class="line">MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sWorkQueue, sThreadFactory);</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) &#123;</span><br><span class="line">	<span class="keyword">if</span> (mStatus != Status.PENDING) &#123;</span><br><span class="line">		<span class="keyword">switch</span> (mStatus) &#123;</span><br><span class="line">		<span class="keyword">case</span> RUNNING:</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">			+ <span class="string">" the task is already running."</span>);</span><br><span class="line">		<span class="keyword">case</span> FINISHED:</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">			+ <span class="string">" the task has already been executed "</span></span><br><span class="line">			+ <span class="string">"(a task can be executed only once)"</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	mStatus = Status.RUNNING;</span><br><span class="line"></span><br><span class="line">	onPreExecute();</span><br><span class="line"></span><br><span class="line">	mWorker.mParams = params;</span><br><span class="line">	sExecutor.execute(mFuture);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>以下是基于sdk2.2 asyncTask的实现：</p>
-<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> CORE_POOL_SIZE = <span class="number">5</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MAXIMUM_POOL_SIZE = <span class="number">128</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> KEEP_ALIVE = <span class="number">10</span>;</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> BlockingQueue&lt;Runnable&gt; sWorkQueue =</span><br><span class="line"><span class="keyword">new</span> LinkedBlockingQueue&lt;Runnable&gt;(<span class="number">10</span>);</span><br><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> ThreadPoolExecutor sExecutor = <span class="keyword">new</span> ThreadPoolExecutor(CORE_POOL_SIZE,</span><br><span class="line">MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sWorkQueue, sThreadFactory);</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">final</span> AsyncTask&lt;Params, Progress, Result&gt; execute(Params... params) &#123;</span><br><span class="line">	<span class="keyword">if</span> (mStatus != Status.PENDING) &#123;</span><br><span class="line">		<span class="keyword">switch</span> (mStatus) &#123;</span><br><span class="line">		<span class="keyword">case</span> RUNNING:</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">			+ <span class="string">" the task is already running."</span>);</span><br><span class="line">			<span class="keyword">case</span> FINISHED:</span><br><span class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Cannot execute task:"</span></span><br><span class="line">			+ <span class="string">" the task has already been executed "</span></span><br><span class="line">			+ <span class="string">"(a task can be executed only once)"</span>);</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	mStatus = Status.RUNNING;</span><br><span class="line"></span><br><span class="line">	onPreExecute();</span><br><span class="line"></span><br><span class="line">	mWorker.mParams = params;</span><br><span class="line">	sExecutor.execute(mFuture);</span><br><span class="line"></span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">this</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>关于corePoolSize和maximumPoolSize，queue和是否新建线程的关系：</p>
-<p>当一个新的任务通过execute(Runnable)提交,如果小于运行着的corePoolSize线程数量，会创建一个新的线程来处理请求，即使其他任务线程是闲置的。<br>如果大于corePoolSize但是小于运行的maximumPoolSize线程，并且queue满了，就会新建一个线程。</p>
-<p>以上都是基于一个Executor来完成的。</p>
-<p>所以一开始AsyncTasks是在一个单独的后台线程中执行，在DONUT版本之后，变为在一个允许多个任务并行运行的线程池中。在HONEYCOMB版本之后，任务会在一个单独的线程中。<br>**</p>
-
+              <a href="/2016/01/06/AsyncTask源码解析/" rel="next" title="AsyncTask源码解析">
+                <i class="fa fa-chevron-left"></i> AsyncTask源码解析
+              </a>
             
-          </span>
-        
-      
-    </div>
+          </div>
 
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
+          <div class="post-nav-prev post-nav-item">
             
-            
-              
-                
-                <a class="post-title-link" href="/2016/01/01/IntentServiceHandlerThread/" itemprop="url">
-                  IntentService & HandlerThread源码解析
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            发表于
-            <time itemprop="dateCreated" datetime="2016-01-01T06:00:07+08:00" content="2016-01-01">
-              2016-01-01
-            </time>
-          </span>
-
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/01/01/IntentServiceHandlerThread/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/01/01/IntentServiceHandlerThread/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
+          </div>
         </div>
-      </header>
-    
-
-
-    <div class="post-body">
-
-      
       
 
       
-        
-          <span itemprop="articleBody">
-            
-              <h3 id="IntentService"><a href="#IntentService" class="headerlink" title="IntentService"></a>IntentService</h3><blockquote>
-<p>IntentService继承自Service,可以处理异步的请求（通过intent传递参数）.客户端通过startService(intent)来发送请求，service开始之后在线程里按顺序处理每一个intent,当它运行完所有任务之后会自动停止。</p>
-<p>如何使用：继承IntentService,实现onHandleIntent(Intent)这个方法，intentService会接受intents,启动一个工作线程，在合适的时候停止这个service。</p>
-<p>所有的请求都在一个工作线程里边被处理，他们可以长时间运行而且不会阻塞应用的主线程，但是同时只能处理一个请求。</p>
-</blockquote>
-<p>首先来看onCreate方法<br>onCreate里生成一个HandlerThread，并通过start（）启动该线程，然后生成一个ServiceHandler</p>
-<pre><code>@Override
-public void onCreate() {
-    /* TODO：最好在这有一个处理部分wakelock（这个坑先留着)的选项，
-    而且应该有一个静态的startService(context,intent)方法启动service同时切换wakelock */
-    super.onCreate();
-    HandlerThread thread = new HandlerThread(&quot;IntentService[&quot; + mName + &quot;]&quot;);
-    thread.start();
-    mServiceLooper = thread.getLooper();
-    mServiceHandler = new ServiceHandler(mServiceLooper);
-}
-</code></pre><p>这是生成的线程中处理消息的Handler(私有final内部类)</p>
-<pre><code>private final class ServiceHandler extends Handler {
-    public ServiceHandler(Looper looper) {
-        super(looper);
-    }
-
-    @Override
-    public void handleMessage(Message msg) {
-        onHandleIntent((Intent)msg.obj);
-        /*通过这里可以看到，当声明的线程里边相关联的MessageLooper里边message被处理完毕之后就会停掉整个service*/
-        stopSelf(msg.arg1);
-    }
-}
-</code></pre><p>onHandleIntent是个抽象方法需要被子类实现，来进行那些需要在非UI线程执行的代码</p>
-<pre><code>/**
-这个方法是在工作线程中被调用，并且传递了相关的请求参数，同一时间只有一个intent被处理，
-但是这个过程是在一个单独的工作线程中运行，所以，如果这些代码长时间运行的话，它会阻塞其他发送到这个intentservice中的请求，
-当所有请求都被处理之后intentserice会停掉自己，所以不要手动调动stopSelf.
-这个方法中的intent参数就是startService(intent)中的参数
-*/
-protected abstract void onHandleIntent(Intent intent);`
-</code></pre><p>在onStart里边将intent和startId发送到MessageLooper里边处理，也就是在onHandleIntent中处理</p>
-<pre><code>@Override
-public void onStart(Intent intent, int startId) {
-    Message msg = mServiceHandler.obtainMessage();
-    msg.arg1 = startId;
-    msg.obj = intent;
-    mServiceHandler.sendMessage(msg);
-}    
-/**
-不要重写此方法，
-*/
-@Override
-public int onStartCommand(Intent intent, int flags, int startId) {
-    onStart(intent, startId);
-    return mRedelivery ? START_REDELIVER_INTENT : START_NOT_STICKY;
-}
-
-/**设置为true,onStartCommand()会返回START_REDELIVER_INTENT,
-然后如果进程在onHandleIntent()返回之前死掉了，进程会重新启动同时intent会被重新传入，
-如果提交了多个intents，只有最近的那个可以保证重新传入
-设置为false,onStartCommand()返回START_NOT_STICKY,如果进程死掉，intent也就陪葬了
-*/
-public void setIntentRedelivery(boolean enabled) {
-    mRedelivery = enabled;
-}
-</code></pre><p>onStartCommand中返回值含义：</p>
-<figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span><br><span class="line">START_STICKY的兼容版本，不保证进程被杀掉之后onStartCommand会被再次调用</span><br><span class="line">*/</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> START_STICKY_COMPATIBILITY = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line">如果服务进程被杀掉，当它启动后（在onStartCommand返回后）会处于started状态而不重新持有传入的intent,</span><br><span class="line">之后系统会尝试重新生成service.因为它处于started状态，它会保证在生成新的service实例之后调用onstartCommand，</span><br><span class="line">如果在此期间没有任何启动命令被传递到,它被调用的时候会被传入一个null的intent，所以得小心。</span><br><span class="line">这种模式对那些任意时候明确开始或停止的有意义，比如执行背景音乐重复的service</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> START_STICKY = <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/** </span><br><span class="line">如果服务进程被杀掉，当它启动后（在onStartCommand返回后）没有新的start intents传递给它，</span><br><span class="line">然后使service处于非started状态而且不会重启直到startService(intent)明确的被调用,</span><br><span class="line">这个service不会调用参数为null的intent的onStartCommand方法，</span><br><span class="line">因为如果没有pending intent传入的话，它不会重启。</span><br><span class="line"></span><br><span class="line">这种模式对要做一些工作来作为开始的结果是有意义的，</span><br><span class="line">但是当内存不足的时候有可能停止并且会在过后明确的开始他们来做更多的工作。</span><br><span class="line">一个从service获取数据例子：可以schedule一个alarm每隔N分钟通过alarm启动它的servide来获取数据,</span><br><span class="line">当它的onStartCommand从alarm调用，它会schedules一个新的N分钟之后响起的alarm，并且产生一个线程来做网络操作。</span><br><span class="line">当检查的时候如果它的进程被杀掉，service不会重启直到alarm响起。</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> START_NOT_STICKY = <span class="number">2</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line">如果服务进程被杀掉，当它启动后（在onStartCommand返回后）它会被有计划的重启，</span><br><span class="line">而且最后传入的intent会在onStartComman中重新传入。</span><br><span class="line">如果这个service的进程当他开始之后（在onStartCommand返回之后）被杀死，</span><br><span class="line">然后它会scheduled一个重启并且最后传入的Intent会通过onStartCommand被重新传入.</span><br><span class="line">这个Intent会依然保留scheduled重传直到service调用带有由onStartCommand提供的start ID作为参数的stopSelf。</span><br><span class="line">service不会收到一个带有Intent值为null的onStartComman(Intent, int, int)</span><br><span class="line">因为他只会因为它还没有结束处理发给它的所有Intents而重启（而且任何pending events都会在重新开始的时候传入）</span><br><span class="line">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> START_REDELIVER_INTENT = <span class="number">3</span>;</span><br></pre></td></tr></table></figure>
-<p>IntentService的onDestroy退出looper</p>
-<pre><code>@Override
-public void onDestroy() {
-    //Looper退出
-    mServiceLooper.quit();
-}
-</code></pre><hr>
-<h3 id="HandlerThread"><a href="#HandlerThread" class="headerlink" title="HandlerThread"></a>HandlerThread</h3><blockquote>
-<p>在IntentService中的工作线程是通过HandlerThread实现，HanderThread是一个拥有looper的线程，这个looper可以用来创建Handler类，start()方法必须被调用。</p>
-</blockquote>
-<pre><code>public HandlerThread(String name) {
-    super(name);
-    //赋予默认的线程优先级
-    mPriority = Process.THREAD_PRIORITY_DEFAULT;
-}
-
-/**
-这个优先级必须是来自Process，不能是Thread
-*/
-public HandlerThread(String name, int priority) {
-    super(name);
-    mPriority = priority;
-}
-
-@Override
-public void run() {
-    mTid = Process.myTid();
-    Looper.prepare();
-    synchronized (this) {//做了同步处理
-        mLooper = Looper.myLooper();
-        //这个notifyAll会唤醒等待获取looper的方法（getLooper（）中）
-        notifyAll();
-    }
-    Process.setThreadPriority(mPriority);
-    onLooperPrepared();
-    Looper.loop();
-    mTid = -1;
-}
-</code></pre><p>在run里边将该线程初始化为Looper,设置优先级，然后循环message队列</p>
-<pre><code>/**
-回调方法：在looper loops之前的一些准备操作可以通过重写这个方法来完成
-*/
-protected void onLooperPrepared() {    
-}
-</code></pre><p>Handler退出Looper</p>
-<pre><code>/**
-退出handler线程的looper
-调用这个方法会中断handler thread的looper,使message queue里边的所有message都不再运行
-在looper被停止之后，任何尝试提交给queue的messages都会失败
-调用这个方法有时不安全，因为有些message在looper中断之前不会再被传递，
-考虑使用quitSafely来代替以确保所有待执行的任务有序的执行
-*/
-public boolean quit() {
-    Looper looper = getLooper();
-    if (looper != null) {
-        looper.quit();
-        return true;
-    }
-    return false;
-}`
-
-/**
-安全的退出handler线程的looper
-当所有在messagequeue里边的messages都被执行之后handler线程的looper才会中断，
-那些延迟执行messages的都不会再执行
-*/
-public boolean quitSafely() {
-    Looper looper = getLooper();
-    if (looper != null) {
-        looper.quitSafely();
-        return true;
-    }
-    return false;
-}
-
-/**
-返回这个线程关联的looper
-如果线程没有开始或因为某些原因isAlive（）returns false,这个方法会返回null，
-如果这个线程已经开始，这个方法会阻塞直到looper被初始化
-*/
-public Looper getLooper() {
-    if (!isAlive()) {
-        return null;
-    }
-    // 如果这个线程已经开始，这个方法会阻塞直到looper被初始化
-    synchronized (this) {
-        while (isAlive() &amp;&amp; mLooper == null) {
-            try {
-                wait();
-                } catch (InterruptedException e) {
-            }
-        }
-    }
-    return mLooper;
-}
-</code></pre><p><strong>综上呢，IntentService继承制Service,内部通过HandlerThread来创建线程和在该线程中生成的Looper完成Handler的消息处理，处理完毕所有通过startService中传入的intent之后就会结束自己。可以通过重写IntentService的onStart方法来改变handler处理message的方式，比如延时。</strong></p>
-
-            
-          </span>
-        
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
       
     </footer>
   </article>
 
 
-    
 
-  </section>
-
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
         </div>
@@ -760,6 +360,14 @@ public Looper getLooper() {
 
 
         
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/01/29/Handler源码解析/"
+           data-title="Handler，Message，MessageQueue，Looper源码解析" data-url="http://yoursite.com/2016/01/29/Handler源码解析/">
+      </div>
+    
+  </div>
+
 
       </div>
 
@@ -780,8 +388,17 @@ public Looper getLooper() {
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" src="http://img1.comic.zongheng.com/comic/image/2008/11/psmj02/500_500/20081215041642361008.jpg" alt="fanyiran" itemprop="image"/>
           <p class="site-author-name" itemprop="name">fanyiran</p>
@@ -826,6 +443,23 @@ public Looper getLooper() {
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler"><span class="nav-number">1.</span> <span class="nav-text">Handler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Message"><span class="nav-number">2.</span> <span class="nav-text">Message</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MessageQueue"><span class="nav-number">3.</span> <span class="nav-text">MessageQueue</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Looper"><span class="nav-number">4.</span> <span class="nav-text">Looper</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
       
 
     </div>
@@ -913,6 +547,167 @@ public Looper getLooper() {
   <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
 
   
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
 
   <script type="text/javascript" src="/js/bootstrap.js"></script>
 
