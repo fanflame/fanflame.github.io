@@ -57,7 +57,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/01/29/Handler源码解析/index.html">
 <meta property="og:site_name" content="梵依然">
 <meta property="og:description" content="Handler/**Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从">
-<meta property="og:updated_time" content="2016-02-01T14:07:10.000Z">
+<meta property="og:updated_time" content="2016-02-01T14:09:38.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Handler，Message，MessageQueue，Looper源码解析">
 <meta name="twitter:description" content="Handler/**Handler允许你提交并处理message或者和线程的MessageQueue相关联的Runnable对象。每一个Handler实例都和一个单独的线程以及这个线程的messge queue相关联。当创建一个新的Handler，它就和创建了它的线程和线程创建的message queue绑定，这时候，它会传递messages和runnables到message queue，然后从">
@@ -267,13 +267,15 @@
 <h3 id="Message"><a href="#Message" class="headerlink" title="Message"></a>Message</h3><p>/<em>*<br>定义一个可以发送给Handler的message，这个message可以包含一个描述和任意数据对象。这个对象包含两个额外的int域和一个额外的对象域，这样在很多情况下就不必再分配<br>虽然构造方法是public,但是最好的方式得到一个message是调用Message.obtain()或者Handler.obtainMessage()，这些方法会从一个循环的对象池中取出他们
 </em>/</p>
 <p>/<em>*<br>一个任意的对象<br>当使用Messager在进程间发送message时，如果包含一个Parcelable的一个框架类(不是由系统实现)，这是唯一不能为空的
-</em>/<br>public Object obj;</p>
+</em>/</p>
+<p>public Object obj;</p>
 <p>/**</p>
 <ul>
 <li>Optional Messenger where replies to this message can be sent. The</li>
 <li>semantics of exactly how this is used are up to the sender and</li>
-<li>receiver.<br>*/<br>public Messenger replyTo;</li>
+<li>receiver.<br>*/</li>
 </ul>
+<p>public Messenger replyTo;</p>
 <p>// 有些时候我们以链表形式存储他们<br>/<em>package</em>/ Message next;</p>
 <p>private static Message sPool;<br>private static final int MAX_POOL_SIZE = 50;<br>private static final Object sPoolSync = new Object();</p>
 <p>当看到以下代码是感觉到大学的数据结构没白学啊。但是为什么不使用现成的Queue呢？</p>
@@ -331,6 +333,10 @@
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/02/01/Loader/" rel="prev" title="Loader">
+                Loader <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -402,7 +408,7 @@
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">3</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -416,7 +422,7 @@
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">4</span>
+              <span class="site-state-item-count">6</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>
