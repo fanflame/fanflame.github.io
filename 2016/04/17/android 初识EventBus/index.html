@@ -1,0 +1,803 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="eventbus," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="1本文档基于EventBus 3.0.0
+EventBus是一个发布／订阅事件总线，用来优化android。
+EventBus是什么
+
+简化组件之间通信。
+解耦事件的发送者和接受者。
+在Activities，Fragments和后台线程之间都有很好的表现
+避免复杂的和容易出错的依赖和生命周期
+
+
+使代码简单
+快，高性能：特别是在注重性能的Android上。也许在其同类的解决方案是最快。
+小（jar">
+<meta property="og:type" content="article">
+<meta property="og:title" content="android 初识EventBus">
+<meta property="og:url" content="http://yoursite.com/2016/04/17/android 初识EventBus/index.html">
+<meta property="og:site_name" content="梵依然">
+<meta property="og:description" content="1本文档基于EventBus 3.0.0
+EventBus是一个发布／订阅事件总线，用来优化android。
+EventBus是什么
+
+简化组件之间通信。
+解耦事件的发送者和接受者。
+在Activities，Fragments和后台线程之间都有很好的表现
+避免复杂的和容易出错的依赖和生命周期
+
+
+使代码简单
+快，高性能：特别是在注重性能的Android上。也许在其同类的解决方案是最快。
+小（jar">
+<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/1322872-102b164552daadce.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:updated_time" content="2016-04-17T01:26:57.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="android 初识EventBus">
+<meta name="twitter:description" content="1本文档基于EventBus 3.0.0
+EventBus是一个发布／订阅事件总线，用来优化android。
+EventBus是什么
+
+简化组件之间通信。
+解耦事件的发送者和接受者。
+在Activities，Fragments和后台线程之间都有很好的表现
+避免复杂的和容易出错的依赖和生命周期
+
+
+使代码简单
+快，高性能：特别是在注重性能的Android上。也许在其同类的解决方案是最快。
+小（jar">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post',
+    motion: true
+  };
+</script>
+
+  <title> android 初识EventBus | 梵依然 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9a8b106566c835a69093eb08a4d87507";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">梵依然</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">fanyiran</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                android 初识EventBus
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-04-17T00:00:00+08:00" content="2016-04-17">
+              2016-04-17
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/17/android 初识EventBus/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/17/android 初识EventBus/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本文档基于EventBus <span class="number">3.0</span><span class="number">.0</span></span><br></pre></td></tr></table></figure>
+<p>EventBus是一个发布／订阅事件总线，用来优化android。<br><img src="http://upload-images.jianshu.io/upload_images/1322872-102b164552daadce.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="EventBus-Publish-Subscribe.png"></p>
+<p><strong>EventBus是什么</strong></p>
+<ul>
+<li>简化组件之间通信。<ol>
+<li>解耦事件的发送者和接受者。</li>
+<li>在Activities，Fragments和后台线程之间都有很好的表现</li>
+<li>避免复杂的和容易出错的依赖和生命周期</li>
+</ol>
+</li>
+<li>使代码简单</li>
+<li>快，高性能：特别是在注重性能的Android上。也许在其同类的解决方案是最快。</li>
+<li>小（jar包小于50K），但是强大：EventBus是一个很小的库，它的API超级简单。然而，你的软件架构也许非常受益于组件解耦：当使用事件的时候，订阅者不需要知道发送者</li>
+<li>在实践中被100,000,000+的应用安装测试证明</li>
+<li>有在线程间传递，订阅优先级等高级特性</li>
+<li>基于方便的注解（不牺牲性能）：只需要通过在你的订阅方法放置@Subscribe注解。因为是在编译的时候索引注解，EventBus不需要在app运行时间做注解反射（在android上会很慢）。</li>
+<li>android主线程传递：当和UI交互的时候，EventBus可以在主线程传递事件无论这个事件是怎么提交的。</li>
+<li>后台线程传递：如果订阅者运行长时间的任务，EventBus也可以使用后台线程来避免UI阻塞。</li>
+<li>事件和订阅继承：在EventBus中，事件和订阅类都是面向对象的范例。事件A是B的父类。提交B类型的事件也会提交给对A感兴趣的订阅者。类似的订阅者类也是如此。</li>
+<li>0配置：在代码中任何位置可以立刻使用一个默认的EventBus实例。</li>
+<li>可配置：可以按需求调整EventBus，可以使用建造者模式调整行为。</li>
+<li>EventBus和Android的广播和Intent系统有什么不同<br>不像Android的广播和intent系统，EventBus使用标准的java类作为事件并且提供更多的方便的API。EventBus更多的使用场景是不想麻烦的设置intent，准备intent extras，实现广播接收者，再提取intent extras。而且开销更低。</li>
+</ul>
+<p><strong>添加到你的工程</strong></p>
+<p>EventBus可以从JCenter和Maven中央仓库获取，所以只需在gradle脚本中添加这个依赖：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">complie</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br></pre></td></tr></table></figure>
+<p>###开始使用EventBus<br>使用EventBus只需3步。在此之前先在Gradle脚本中添加依赖。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">complie</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br></pre></td></tr></table></figure>
+<p><strong>第一步：定义事件</strong></p>
+<p>事件是POJO（plain old java object）类型,不需要特别需求</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageEvent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> String message;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MessageEvent</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.message = message;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>第二步：准备订阅者</strong></p>
+<p>订阅者实现事件处理方法（也叫做订阅者方法），这个方法会在事件提交的时候被调用。这些是使用@Subscribe注解定义的。请注意EventBus 3的方法名字可以自由选择（不像EventBus 2中约束的那样）。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当一个Message Event提交的时候这个方法会被调用</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessageEvent</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    Toast.makeText(getActivity(), <span class="keyword">event</span>.message, Toast.LENGTH_SHORT).show();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当一个SomeOtherEvent被提交的时候这个方法被调用。</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleSomethingElse</span>(<span class="params">SomeOtherEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    doSomethingWith(<span class="keyword">event</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>订阅者也需要在bus中注册和注销。只有在订阅者注册的时候，他们才会收到事件。在Android中，Activities和Fragments通常绑定他们的生命周期.</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onStart();</span><br><span class="line">    EventBus.getDefault().register(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   EventBus.getDefault().unregister(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">super</span>.onStop();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>第三步：提交事件</strong></p>
+<p>在代码中任意部位提交事件。所有当前注册的匹配事件类型的订阅者会收到事件。</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EventBus.getDefault().post(<span class="keyword">new</span> MessageEvent(<span class="string">"Hello everyone!"</span>));</span><br></pre></td></tr></table></figure>
+<h3 id="u7EBF_u7A0B_u95F4_u4F20_u9012_uFF08_u7EBF_u7A0B_u6A21_u5F0F_uFF09"><a href="#u7EBF_u7A0B_u95F4_u4F20_u9012_uFF08_u7EBF_u7A0B_u6A21_u5F0F_uFF09" class="headerlink" title="线程间传递（线程模式）"></a>线程间传递（线程模式）</h3><p>事件可以在不同线程间传递。典型的使用就是用来处理UI改变，网络操作，或者耗时的操作。EventBus可以处理这些任务并同步UI线程（不必再考虑线程转换，使用AsyncTask，等）。<br>有四种线程模式：</p>
+<p><strong>线程模式：POSTING</strong></p>
+<p>默认情况下，订阅者在被提交事件的线程被调用。事件同步完成传递，一旦事件提交所有的订阅者都会被调用。这种模式意味着最小的开销，因为避免了线程切换。所以对那些花费很短的时间来完成，不需要在主线程中的简单的任务这是推荐使用的模式。事件处理程序使用这种应该是很快能返回，避免阻塞提交线程比如主线程。比如：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.POSTING) <span class="comment">// ThreadMode is optional here</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    log(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：MAIN</strong></p>
+<p>订阅者会在主线程被调用。如果提交的线程是主线程，事件处理方法会直接被调用（就像Thread.POSTING描述的那样同步）。事件处理程序使用这个模式必须快速返回避免阻塞主线程。比如：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.MAIN)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    textField.setText(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：BACKGROUND</strong></p>
+<p>订阅者会在后台线程被调用。如果不是在主线程提交，事件处理方法会直接在提交线程被调用。如果是在主线程提交，EventBus使用一个单独的后台线程按顺序传递所有事件。事件处理使用这种模式应该尽快返回避免阻塞后台线程。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.BACKGROUND)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    saveToDisk(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：ASYNC</strong></p>
+<p>事件处理方法会在一个单独的线程被调用。这个线程通常和提交的线程和主线程是独立的。提交的事件从不等待事件处理方法。事件处理方法如果需要花费一段时间比如访问网络应该使用这种模式。避免在同一时间触发大量长时间异步的处理方法来限制并发的线程。EventBus使用一个线程池来有效重复利用线程完成的异步事件处理程序的通知。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.ASYNC)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    backend.send(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###配置<br>EventBusBuilder用来配置EventBus。比如，如果一个提交的事件没有订阅者，可以让EventBus保持安静。</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.logNoSubscriberMessages(<span class="literal">false</span>)</span><br><span class="line">    .sendNoSubscriberEvent(<span class="literal">false</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>另一个例子是当一个订阅者抛出一个异常的失败。注意：默认情况下，EventBus捕获异常从onEvent方法中抛出并且发出一个SubscriberExceptionEvent ，这个事件可能不必处理。</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.throwSubscriberException(<span class="literal">true</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>更多配置，查看<a href="http://greenrobot.org/files/eventbus/javadoc/3.0/org/greenrobot/eventbus/EventBusBuilder.html" target="_blank" rel="external">官方文档</a></p>
+<p><strong>配置默认EventBus实例</strong></p>
+<p>使用EventBus.getDefault()是一个简单的方法获取共享的EventBus实例。EventBusBuilder也可以使用installDefaultEventBus()方法来配置这个默认的实例。<br>比如，当在onEvent方法中发生异常的时候，可以配置默认的EventBus实例来重新抛出异常。建议在使用DEBUG模式的时候这么使用，因为这样app会因为这个异常而崩溃。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">EventBus</span><span class="class">.builder</span>()<span class="class">.throwSubscriberException</span>(<span class="tag">BuildConfig</span><span class="class">.DEBUG</span>)<span class="class">.installDefaultEventBus</span>();</span><br></pre></td></tr></table></figure>
+<p>注意：只有在默认EventBus实例在第一次使用之前这么配置一次。后续调用installDefaultEventBus() 会抛出异常。这确保应用程序的行为一致。可以在Application类中配置默认的EventBus。</p>
+<p>###Sticky Event<br>一些事件携带在事件提交之后仍然感兴趣的信息。比如，一个事件标记一些初始化完成或者一些传感器或位置数据的最新的值。可以使用sticky事件来代替你自己的实现。EventBus在内存中保持某一个类型的最后的sticky事件。这个sticky事件可以传递到订阅者或者也可以被明确的查询。因此，不需要任何特殊的逻辑来考虑已经可用的数据。</p>
+<p><strong>Sticky实例</strong></p>
+<p>一个sticky事件是一段时间之前被提交的。</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EventBus.getDefault().postSticky(<span class="keyword">new</span> MessageEvent(<span class="string">"Hello everyone!"</span>));</span><br></pre></td></tr></table></figure>
+<p>现在，sticky事件被提交了，一个新的activity启动。在注册过程中所有的sticky的订阅者方法都会立刻获取到之前提交的sticky事件：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onStart();</span><br><span class="line">        EventBus.getDefault().register(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Subscribe</span>(sticky = <span class="keyword">true</span>, threadMode = ThreadMode.MAIN)</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(MessageEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// UI updates must run on MainThread</span></span><br><span class="line">        textField.setText(event.message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().unregister(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">super</span>.onStop();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><strong>手动获取和移除sticky事件</strong></p>
+<p>就像前一段说的那样，最后的sticky事件在订阅者注册的时候会自动传递。但是，有时候手动检测sticky事件更方便。有时候他们不再传递的时候需要移除sticky事件。比如：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MessageEvent stickyEvent =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>.getStickyEvent(MessageEvent.class<span class="function">)</span>;</span><br><span class="line">// Better<span class="instruction"> check </span>that an event was actually posted before</span><br><span class="line">if(stickyEvent != null<span class="function">)</span> &#123;</span><br><span class="line">    // <span class="string">"Consume"</span> the sticky event</span><br><span class="line">   <span class="function"> EventBus.getDefault(</span><span class="function">)</span>.removeStickyEvent(stickyEvent<span class="function">)</span>;</span><br><span class="line">    // Now do something with it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>removeStickyEvent方法是超载的：当传入一个类，它会返回之前保持的sticky事件。使用这中变化可以提升之前的例子。</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MessageEvent stickyEvent =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>.removeStickyEvent(MessageEvent.class<span class="function">)</span>;</span><br><span class="line">// Better<span class="instruction"> check </span>that an event was actually posted before</span><br><span class="line">if(stickyEvent != null<span class="function">)</span> &#123;</span><br><span class="line">    // Now do something with it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###优先级和事件取消<br>大部分的EventBus都不需要优先级或事件取消，但是它们在特殊情况下会派上用场。比如，一个app在后台运行的时候一个事件触发了一些UI的逻辑 ，但是如果app当前对用户是不可见的，那么应该有不同的反应。</p>
+<p><strong>订阅者优先级</strong></p>
+<p>可以通过在注册期间提供的优先级来改变事件传递的顺序。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Subscribe</span>(priority = <span class="number">1</span>);</span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(MessageEvent event)</span> </span>&#123;</span><br><span class="line">…</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在相同的传递线程（ThreadMode），高优先级的订阅者接收事件会在低优先级之前。默认优先级是0。<br>注意：优先级不会对不同ThreadModes订阅者之间的传递顺序有影响。</p>
+<p><strong>取消事件传递</strong></p>
+<p>在订阅者事件处理方法中通过cancelEventDelivery（Object event）取消事件传递。任何之后的事件传递都会取消：后续的订阅者不再接收这个事件。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Called in the same thread (default)</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line"><span class="comment">// Process the event</span></span><br><span class="line">…</span><br><span class="line"></span><br><span class="line">EventBus.getDefault().cancelEventDelivery(<span class="keyword">event</span>) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>事件通常是被优先级高的订阅者取消。取消对于运行在提交线程ThreadMode.PostThread的事件处理方法是被限制的。</p>
+<p>###订阅者索引</p>
+<p>订阅者索引（subscriber index）是EventBus3的新特性。这是个可选的优化项来提速初始化订阅者注册。订阅者索引可以使用EventBus的注解处理器在编译阶段创建。虽然使用索引不是必须的，但是android最佳实践还是推荐使用。</p>
+<p><strong>索引先决条件</strong></p>
+<p>注意只有订阅者和事件类是public，@Subscriber方法能被索引。由于java的注解本身处理的技术限制，@Subscribe注解不会被匿名内部类识别。当EventBus不能使用索引，它会自动回退到运行时起作用。所以它仍然起作用，只是慢了一点。</p>
+<p><strong>生成索引</strong></p>
+<p>为了能够生成索引，需要添加EventBus注解处理器到使用了android－apt gradle插件的编译环境。还需要传递一个参数为“eventBusIndex”到指定完全限定的想要生成索引的类。添加下面的部分到Gradle编译脚本：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">buildscript</span> &#123;</span><br><span class="line">    <span class="title">dependencies</span> &#123;</span><br><span class="line">        <span class="title">classpath</span> <span class="string">'com.neenbedankt.gradle.plugins:android-apt:1.8'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">apply plugin: <span class="string">'com.neenbedankt.android-apt'</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="title">compile</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br><span class="line">    apt <span class="string">'org.greenrobot:eventbus-annotation-processor:3.0.1'</span></span><br><span class="line">&#125;</span><br><span class="line">apt &#123;</span><br><span class="line">    <span class="title">arguments</span> &#123;</span><br><span class="line">        <span class="title">eventBusIndex</span> <span class="string">"com.example.myapp.MyEventBusIndex"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当下次编译工程的时候，“eventBusIndex”这个类会生成。当设置EventBus的时候，只需要这样：</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.addIndex(new <span class="type">MyEventBusIndex</span><span class="literal">()</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>或者想使用默认的实例，可以这样：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EventBus.builder(<span class="function">)</span>.addIndex(new<span class="function"> MyEventBusIndex(</span><span class="function">)</span><span class="function">)</span>.installDefaultEventBus(<span class="function">)</span>;</span><br><span class="line">// Now the default<span class="instruction"> instance </span>uses the given index. Use it like this:</span><br><span class="line">EventBus eventBus =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>;</span><br></pre></td></tr></table></figure>
+<p><strong>索引Libraries</strong></p>
+<p>应用相同的原理来索引Library的一部分代码（并不是最终的应用程序）。这样，可以会生成多个索引类，在设置EventBus的时候这样使：</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span></span><br><span class="line">    .addIndex(new <span class="type">MyEventBusAppIndex</span><span class="literal">()</span>)</span><br><span class="line">    .addIndex(new <span class="type">MyEventBusLibIndex</span><span class="literal">()</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>###混淆<br>混淆器混淆方法名称，有可能会移除方法那些没有调用的方法。因为订阅方法没有被直接调用，混淆器误认为他们没有被使用。在ProGuard配置中使用下面的片段保护订阅者被移除：</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-keepattributes *<span class="constant">Annotation</span>*</span><br><span class="line">-keepclassmembers <span class="class"><span class="keyword">class</span> ** &#123;</span></span><br><span class="line">    <span class="variable">@org</span>.greenrobot.eventbus.<span class="constant">Subscribe</span> &lt;methods&gt;;</span><br><span class="line">&#125;</span><br><span class="line">-keep <span class="class"><span class="keyword">enum</span> <span class="title">org</span>.<span class="title">greenrobot</span>.<span class="title">eventbus</span>.<span class="title">ThreadMode</span> &#123; *;</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Only required if you use AsyncExecutor</span></span><br><span class="line">-keepclassmembers <span class="class"><span class="keyword">class</span> * <span class="title">extends</span> <span class="title">org</span>.<span class="title">greenrobot</span>.<span class="title">eventbus</span>.<span class="title">util</span>.<span class="title">ThrowableFailureEvent</span> &#123;</span></span><br><span class="line">    &lt;init&gt;(java.lang.<span class="constant">Throwable</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意：不管是否使用索引，都需要这么配置。</p>
+<p>###AsyncExecutor</p>
+<p>免责声明：AsyncExecutor不是一个核心的utility类。在处理后台线程它也许会保存一些错误代码，但是它不是一个核心的EventBus类。<br>AsyncExecutor像一个线程池，但是有错误（异常）处理。错误会抛出异常，AsyncExecutor会在事件中包裹这些异常。<br>通常调用AsyncExecutor.create()方法在Application中来创建一个实例。实现RunnableEx接口来执行。RunnableEx和Runnable不一样，RunnableEx会抛出异常。<br>如果RunnableEx的实现抛出一个异常，它会在ThrowableFailureEvent中捕获到。<br>执行的例子：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">AsyncExecutor.create().execute(</span><br><span class="line">  <span class="keyword">new</span> RunnableEx &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> run <span class="keyword">throws</span> LoginException &#123;</span><br><span class="line">      <span class="comment">// No need to catch any Exception (here: LoginException)</span></span><br><span class="line">      remote.login();</span><br><span class="line">      EventBus.getDefault().postSticky(<span class="keyword">new</span> LoggedInEvent());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接收的例子：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEventMainThread</span>(<span class="params">LoggedInEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Change some UI</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEventMainThread</span>(<span class="params">ThrowableFailureEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Show error in UI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>AsyncExecutor生成器</strong></p>
+<p>使用静态的Async Executor来自定义Async Executor实例。它会返回一个生成器来自定义EventBus实例，线程池，和失败的事件类。<br>另一个可以自定义的选项是提供错误事件上下文环境信息的执行范围。比如，一个错误事件可能只关联到一个指定的Activity实例或类。你自定义错误事件实现了HasExecutionScope接口，AsyncExecutor会自动设置执行范围。这样，订阅者可以在它执行范围查询错误事件并基于它做出相应操作。</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/eventbus/" rel="tag">#eventbus</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/02/Android CountDownTimer源码解析/" rel="next" title="Android CountDownTimer源码解析">
+                <i class="fa fa-chevron-left"></i> Android CountDownTimer源码解析
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+
+        
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/04/17/android 初识EventBus/"
+           data-title="android 初识EventBus" data-url="http://yoursite.com/2016/04/17/android 初识EventBus/">
+      </div>
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="http://img1.comic.zongheng.com/comic/image/2008/11/psmj02/500_500/20081215041642361008.jpg" alt="fanyiran" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">fanyiran</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">fanyiran</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#u7EBF_u7A0B_u95F4_u4F20_u9012_uFF08_u7EBF_u7A0B_u6A21_u5F0F_uFF09"><span class="nav-number">1.</span> <span class="nav-text">线程间传递（线程模式）</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fanyiran</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"fanyiran"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+
+  
+  
+
+</body>
+</html>

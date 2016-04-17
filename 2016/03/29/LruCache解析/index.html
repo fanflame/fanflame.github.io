@@ -1,0 +1,774 @@
+<!doctype html>
+<html class="theme-next   use-motion ">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  <link href="/vendors/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css"/>
+
+
+
+
+  <link href="//fonts.googleapis.com/css?family=Lato:300,400,700,400italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+
+
+
+<link href="/vendors/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=0.4.5.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="LruChche," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=0.4.5.2" />
+
+
+
+
+
+
+<meta name="description" content="LruCacheLruCache,最近最少使用缓存算法，乍一听好复杂的算法，还得记录和比较使用次数啥的，看来源码才知道，原来只是名字挺唬人。
+LruCache是一种保持一定数量values（被缓存的值）的强引用的缓存。每次缓存value的时候，它会移到队列的头部。当一个value添加到一个已经满的缓存的时候，那个队列最后的value会被抛弃并且这时候最后的value可以被垃圾回收。如果缓存的val">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LruCache解析">
+<meta property="og:url" content="http://yoursite.com/2016/03/29/LruCache解析/index.html">
+<meta property="og:site_name" content="梵依然">
+<meta property="og:description" content="LruCacheLruCache,最近最少使用缓存算法，乍一听好复杂的算法，还得记录和比较使用次数啥的，看来源码才知道，原来只是名字挺唬人。
+LruCache是一种保持一定数量values（被缓存的值）的强引用的缓存。每次缓存value的时候，它会移到队列的头部。当一个value添加到一个已经满的缓存的时候，那个队列最后的value会被抛弃并且这时候最后的value可以被垃圾回收。如果缓存的val">
+<meta property="og:updated_time" content="2016-04-17T01:20:41.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="LruCache解析">
+<meta name="twitter:description" content="LruCacheLruCache,最近最少使用缓存算法，乍一听好复杂的算法，还得记录和比较使用次数啥的，看来源码才知道，原来只是名字挺唬人。
+LruCache是一种保持一定数量values（被缓存的值）的强引用的缓存。每次缓存value的时候，它会移到队列的头部。当一个value添加到一个已经满的缓存的时候，那个队列最后的value会被抛弃并且这时候最后的value可以被垃圾回收。如果缓存的val">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var CONFIG = {
+    scheme: 'Mist',
+    sidebar: 'post',
+    motion: true
+  };
+</script>
+
+  <title> LruCache解析 | 梵依然 </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  <!--[if lte IE 8]>
+  <div style=' clear: both; height: 59px; padding:0 0 0 15px; position: relative;margin:0 auto;'>
+    <a href="http://windows.microsoft.com/en-US/internet-explorer/products/ie/home?ocid=ie6_countdown_bannercode">
+      <img src="http://7u2nvr.com1.z0.glb.clouddn.com/picouterie.jpg" border="0" height="42" width="820"
+           alt="You are using an outdated browser. For a faster, safer browsing experience, upgrade for free today or use other browser ,like chrome firefox safari."
+           style='margin-left:auto;margin-right:auto;display: block;'/>
+    </a>
+  </div>
+<![endif]-->
+  
+
+
+
+  <script type="text/javascript">
+    var _hmt = _hmt || [];
+    (function() {
+      var hm = document.createElement("script");
+      hm.src = "//hm.baidu.com/hm.js?9a8b106566c835a69093eb08a4d87507";
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(hm, s);
+    })();
+  </script>
+
+
+
+
+  <div class="container one-column page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">梵依然</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">fanyiran</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu ">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-home fa-fw"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-user fa-fw"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-archive fa-fw"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-tags fa-fw"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+
+      
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div id="content" class="content">
+          
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                LruCache解析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-03-29T00:00:00+08:00" content="2016-03-29">
+              2016-03-29
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/29/LruCache解析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/29/LruCache解析/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        <span itemprop="articleBody"><h3 id="LruCache"><a href="#LruCache" class="headerlink" title="LruCache"></a>LruCache</h3><p>LruCache,最近最少使用缓存算法，乍一听好复杂的算法，还得记录和比较使用次数啥的，看来源码才知道，原来只是名字挺唬人。</p>
+<p>LruCache是一种保持一定数量values（被缓存的值）的强引用的缓存。每次缓存value的时候，它会移到队列的头部。当一个value添加到一个已经满的缓存的时候，那个队列最后的value会被抛弃并且这时候最后的value可以被垃圾回收。如果缓存的values持有的资源需要明确的释放，重写entryRemoved方法来释放持有的资源。</p>
+<p>如果一个cache miss(缓存未命中)的时候需要得到key值相对应的value，重写create()方法.即使有一个cache miss，也允许一直返回一个它假定的值,这是为了简化调用代码，</p>
+<p>默认情况下，缓存大小通过entries的数量来计算。重写sizeOf方法按不同的单位来计算缓存。比如：</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> cacheSize = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>; <span class="comment">// 4MiB</span></span><br><span class="line">LruCache&lt;String, Bitmap&gt; bitmapCache = <span class="keyword">new</span> LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">sizeOf</span><span class="params">(String key, Bitmap value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.getByteCount();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p> 这个类是线程安全的。执行多个缓存操作会原子的按以下同步缓存。</p>
+ <figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span> (cache) &#123;</span><br><span class="line">  <span class="keyword">if</span> (cache.<span class="built_in">get</span>(<span class="variable">key</span>) == <span class="keyword">null</span>) &#123;</span><br><span class="line">      cache.put(<span class="variable">key</span>, value);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这个类不允许key或value为null。从get,put,remove返回的null表示key不存在<br>从android3.1开始出现</p>
+<p>LruCache<k,v>构造方法传入缓存的最大值，内部使用LinkedHashMap<k,v>来保存缓存的值</k,v></k,v></p>
+   <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">LruCache</span><span class="params">(<span class="keyword">int</span> maxSize)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (maxSize &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"maxSize &lt;= 0"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.maxSize = maxSize;</span><br><span class="line">    <span class="keyword">this</span>.<span class="built_in">map</span> = <span class="keyword">new</span> LinkedHashMap&lt;K, V&gt;(<span class="number">0</span>, <span class="number">0.75f</span>, <span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>/**
+ * @hide
+ */
+public void resize(int maxSize) {
+    if (maxSize &lt;= 0) {
+        throw new IllegalArgumentException(&quot;maxSize &lt;= 0&quot;);
+    }
+
+    synchronized (this) {
+        this.maxSize = maxSize;
+    }
+    trimToSize(maxSize);
+}
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    </span><br><span class="line"><span class="built_in">get</span>方法，如果在缓存中存在或者可以通过<span class="built_in">create</span>方法创建的，返回key对应的<span class="built_in">value</span>值。如果<span class="built_in">value</span>返回了，它会移到队列的头部。如果这个<span class="built_in">value</span>没有被缓存或不能被创建，返回<span class="constant">null</span>.</span><br></pre></td></tr></table></figure>
+
+public final V get(K key) {
+    if (key == null) {
+        throw new NullPointerException(&quot;key == null&quot;);
+    }
+
+    V mapValue;
+    synchronized (this) {
+        mapValue = map.get(key);//从hashmap中获取key对应的缓存值。
+        if (mapValue != null) {
+            hitCount++;//不为空，缓存命中加1
+            return mapValue;
+        }
+        missCount++;//若为空缓存未命中加1
+    }
+
+    /*
+       缓存未击中之后会将该值加入到map中。接下来会尝试通过用户重写的create方法创建一个value。这个创建过程可能会花好久，当create（）返回的时候map可能会变的有所不一样。
+       当create()执行的时候，如果map中添加了一个冲突的value,那么不管map中的value，将刚创建的value释放掉。
+     */
+
+    V createdValue = create(key);
+    if (createdValue == null) {
+        return null;
+    }
+
+    synchronized (this) {
+        createCount++;
+        mapValue = map.put(key, createdValue);//hashmap put方法，返回key之前对应的值
+
+        if (mapValue != null) {
+            // 这有一个冲突，所以撤销最后一次put，也就是将之前的值再put回去。
+            map.put(key, mapValue);
+        } else {
+            size += safeSizeOf(key, createdValue);
+        }
+    }
+
+    if (mapValue != null) {//释放刚刚创建的value持有的资源。
+        entryRemoved(false, key, createdValue, mapValue);
+        return mapValue;
+    } else {
+        trimToSize(maxSize);
+        return createdValue;
+    }
+}
+</code></pre><figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">put方法，被添加的value会移动到队列的头部，返回<span class="variable">key</span>之前映射的value</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> V put(K <span class="variable">key</span>, V value) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">key</span> == <span class="keyword">null</span> || value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"key == null || value == null"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        V previous;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            putCount++;<span class="comment">//put计数器</span></span><br><span class="line">            <span class="built_in">size</span> += safeSizeOf(<span class="variable">key</span>, value);</span><br><span class="line">            previous = <span class="built_in">map</span>.put(<span class="variable">key</span>, value);</span><br><span class="line">            <span class="keyword">if</span> (previous != <span class="keyword">null</span>) &#123;<span class="comment">//key之前有对应的值</span></span><br><span class="line">                <span class="built_in">size</span> -= safeSizeOf(<span class="variable">key</span>, previous);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (previous != <span class="keyword">null</span>) &#123;<span class="comment">//释放之前value持有的资源。</span></span><br><span class="line">            entryRemoved(<span class="keyword">false</span>, <span class="variable">key</span>, previous, value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        trimToSize(maxSize);</span><br><span class="line">        <span class="keyword">return</span> previous;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>trimToSize方法。移除最老的entries直到所有剩余的entries在要求的大小之内。maxSize 在返回之前最大缓存值。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> trimToSize(<span class="built_in">int</span> maxSize) &#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        K <span class="variable">key</span>;</span><br><span class="line">        V value;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">size</span> &lt; <span class="number">0</span> || (<span class="built_in">map</span>.isEmpty() &amp;&amp; <span class="built_in">size</span> != <span class="number">0</span>)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(getClass().getName()</span><br><span class="line">                        + <span class="string">".sizeOf() is reporting inconsistent results!"</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">size</span> &lt;= maxSize) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">           <span class="comment">// 获取到linked列表的最后一项</span></span><br><span class="line">           <span class="comment">// 不同版本，这得实现可能不同</span></span><br><span class="line">            Map.Entry&lt;K, V&gt; toEvict = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">for</span> (Map.Entry&lt;K, V&gt; entry : <span class="built_in">map</span>.entrySet()) &#123;</span><br><span class="line">                toEvict = entry;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (toEvict == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="variable">key</span> = toEvict.getKey();</span><br><span class="line">            value = toEvict.getValue();</span><br><span class="line">            <span class="built_in">map</span>.remove(<span class="variable">key</span>);</span><br><span class="line">            <span class="built_in">size</span> -= safeSizeOf(<span class="variable">key</span>, value);</span><br><span class="line">            evictionCount++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        entryRemoved(<span class="keyword">true</span>, <span class="variable">key</span>, value, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>remve方法，返回key对应的value</p>
+<pre><code>public final V remove(K key) {
+    if (key == null) {
+        throw new NullPointerException(&quot;key == null&quot;);
+    }
+
+    V previous;
+    synchronized (this) {
+        previous = map.remove(key);
+        if (previous != null) {//成功移除，修改缓存当前大小
+            size -= safeSizeOf(key, previous);
+        }
+    }
+
+    if (previous != null) {//释放资源
+        entryRemoved(false, key, previous, null);
+    }
+
+    return previous;
+}
+</code></pre><p>entryRemoved方法。已经被驱逐或被移除的entries会调用这个方法。当一个value被驱逐来释放空间，调用remove来移除或者调用put方法替换的时候会调用这个方法。默认实现什么都不做。方法调用的时候没有同步：在这个方法执行的时候其他线程可以访问缓存。evicted参数：如果entry被移除来释放空间返回true,如果移除是因为put方法或remove方法返回false。newValue参数表示key对应的新的value(如果存在的话).这个值如果不为空，是因为put引起的。否则的话是驱逐或remove引起的</p>
+ <figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">entryRemoved</span><span class="params">(<span class="keyword">boolean</span> evicted, K key, V oldValue, V newValue)</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p> create方法。在缓存未中之后调用来计算key映射的value.方法调用的时候没有同步：在这个方法执行的时候其他线程可以访问缓存。当这个方法返回的时候，如果key对应的value在cache中存在，创建的value会通过entryRemove()释放并丢弃。当多个线程在同一时间请求相同的key的时候（引起多个values被创建），或者当一个线程调用put方法另一个正在为这个key创建一个value可能会发生这种情况</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function">V <span class="title">create</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>safeSizeOf方法，检测用户重写的sizeOf方法的返回值是否合法。</p>
+<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private <span class="type">int</span> safeSizeOf(K key, V value) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="literal">result</span> = sizeOf(key, value);</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">result</span> &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        throw new <span class="type">IllegalStateException</span>(<span class="string">"Negative size: "</span> + key + <span class="string">"="</span> + value);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">result</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>sizeOf方法按用户定义的单位返回entry的大小。默认实现是返回1，这时候size表示entris的数量，max size表示entries的最大数量。entry的大小在缓存期间不能改变</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">sizeOf</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * 清空缓存</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> final <span class="keyword">void</span> <span class="title">evictAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    trimToSize(-<span class="number">1</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>size方法，final类型，不能被子类重写。如果缓存没有重写sizeOf()方法，这个方法返回缓存中entries的数量。对于其他的缓存，这个返回缓存中entries大小的和。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="keyword">size</span>() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">size</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>snapshot方法返回当前缓存内容的拷贝，按照最近最少使用到最近最多使用的顺序。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">final</span> Map&lt;K, V&gt; snapshot() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> LinkedHashMap&lt;K, V&gt;(<span class="built_in">map</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总之，LruCache内部使用LinkedHashMap来保存缓存的值。初始化的时候传入缓存的最大值或者缓存的最大个数（如果sizeOf方法返回1的话）。如果重写来create方法，在使用get方法的时候，如果缓存不存在，就将新创建的value加入到缓存中，这样就不用再次使用put来加入缓存了（因为create不是线程安全的，所以，创建成功之后是否应该加入缓存还需要再判断一下）。</p>
+</span>
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/LruChche/" rel="tag">#LruChche</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/02/01/loader解析/" rel="next" title="Loader&AsyncTaskLoader<D>&CursorLoader&CancellationSignal&LoaderManager">
+                <i class="fa fa-chevron-left"></i> Loader&AsyncTaskLoader<D>&CursorLoader&CancellationSignal&LoaderManager
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/02/Android CountDownTimer源码解析/" rel="prev" title="Android CountDownTimer源码解析">
+                Android CountDownTimer源码解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+        </div>
+
+        
+
+
+        
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/03/29/LruCache解析/"
+           data-title="LruCache解析" data-url="http://yoursite.com/2016/03/29/LruCache解析/">
+      </div>
+    
+  </div>
+
+
+      </div>
+
+      
+        
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" src="http://img1.comic.zongheng.com/comic/image/2008/11/psmj02/500_500/20081215041642361008.jpg" alt="fanyiran" itemprop="image"/>
+          <p class="site-author-name" itemprop="name">fanyiran</p>
+        </div>
+        <p class="site-description motion-element" itemprop="description">fanyiran</p>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/archives">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          <div class="site-state-item site-state-categories">
+            
+              <span class="site-state-item-count">0</span>
+              <span class="site-state-item-name">分类</span>
+              
+          </div>
+
+          <div class="site-state-item site-state-tags">
+            <a href="/tags">
+              <span class="site-state-item-count">8</span>
+              <span class="site-state-item-name">标签</span>
+              </a>
+          </div>
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+        
+        
+
+        <div class="links-of-author motion-element">
+          
+        </div>
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc-indicator-top post-toc-indicator">
+            <i class="fa fa-angle-double-up"></i>
+          </div>
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#LruCache"><span class="nav-number">1.</span> <span class="nav-text">LruCache</span></a></li></ol></div>
+            
+          </div>
+          <div class="post-toc-indicator-bottom post-toc-indicator">
+            <i class="fa fa-angle-double-down"></i>
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+      
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2016</span>
+  <span class="with-love">
+    <i class="icon-next-heart fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">fanyiran</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="http://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+
+      </div>
+    </footer>
+
+    <div class="back-to-top"></div>
+  </div>
+
+  <script type="text/javascript" src="/vendors/jquery/index.js?v=2.1.3"></script>
+
+  
+  
+
+  
+    
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"fanyiran"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+    
+     
+
+
+    
+  
+
+  
+  <script type="text/javascript" src="/vendors/fancybox/source/jquery.fancybox.pack.js"></script>
+  <script type="text/javascript" src="/js/fancy-box.js?v=0.4.5.2"></script>
+
+
+  <script type="text/javascript" src="/js/helpers.js?v=0.4.5.2"></script>
+  <script type="text/javascript" src="/vendors/velocity/velocity.min.js"></script>
+<script type="text/javascript" src="/vendors/velocity/velocity.ui.min.js"></script>
+
+<script type="text/javascript" src="/js/motion.js?v=0.4.5.2" id="motion.global"></script>
+
+
+  <script type="text/javascript" src="/vendors/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  <script type="text/javascript" src="/vendors/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  
+<script type="text/javascript" src="/js/bootstrap.scrollspy.js?v=0.4.5.2" id="bootstrap.scrollspy.custom"></script>
+
+
+<script type="text/javascript" id="sidebar.toc.highlight">
+  $(document).ready(function () {
+    var tocSelector = '.post-toc';
+    var $tocSelector = $(tocSelector);
+    var activeCurrentSelector = '.active-current';
+
+    $tocSelector
+      .on('activate.bs.scrollspy', function () {
+        var $currentActiveElement = $(tocSelector + ' .active').last();
+
+        removeCurrentActiveClass();
+        $currentActiveElement.addClass('active-current');
+
+        $tocSelector[0].scrollTop = $currentActiveElement.position().top;
+      })
+      .on('clear.bs.scrollspy', function () {
+        removeCurrentActiveClass();
+      });
+
+    function removeCurrentActiveClass () {
+      $(tocSelector + ' ' + activeCurrentSelector)
+        .removeClass(activeCurrentSelector.substring(1));
+    }
+
+    function processTOC () {
+      getTOCMaxHeight();
+      toggleTOCOverflowIndicators();
+    }
+
+    function getTOCMaxHeight () {
+      var height = $('.sidebar').height() -
+                   $tocSelector.position().top -
+                   $('.post-toc-indicator-bottom').height();
+
+      $tocSelector.css('height', height);
+
+      return height;
+    }
+
+    function toggleTOCOverflowIndicators () {
+      tocOverflowIndicator(
+        '.post-toc-indicator-top',
+        $tocSelector.scrollTop() > 0 ? 'show' : 'hide'
+      );
+
+      tocOverflowIndicator(
+        '.post-toc-indicator-bottom',
+        $tocSelector.scrollTop() >= $tocSelector.find('ol').height() - $tocSelector.height() ? 'hide' : 'show'
+      )
+    }
+
+    $(document).on('sidebar.motion.complete', function () {
+      processTOC();
+    });
+
+    $('body').scrollspy({ target: tocSelector });
+    $(window).on('resize', function () {
+      if ( $('.sidebar').hasClass('sidebar-active') ) {
+        processTOC();
+      }
+    });
+
+    onScroll($tocSelector);
+
+    function onScroll (element) {
+      element.on('mousewheel DOMMouseScroll', function (event) {
+          var oe = event.originalEvent;
+          var delta = oe.wheelDelta || -oe.detail;
+
+          this.scrollTop += ( delta < 0 ? 1 : -1 ) * 30;
+          event.preventDefault();
+
+          toggleTOCOverflowIndicators();
+      });
+    }
+
+    function tocOverflowIndicator (indicator, action) {
+      var $indicator = $(indicator);
+      var opacity = action === 'show' ? 1 : 0;
+      $indicator.velocity ?
+        $indicator.velocity('stop').velocity({
+          opacity: opacity
+        }, { duration: 100 }) :
+        $indicator.stop().animate({
+          opacity: opacity
+        }, 100);
+    }
+
+  });
+</script>
+
+<script type="text/javascript" id="sidebar.nav">
+  $(document).ready(function () {
+    var html = $('html');
+    var TAB_ANIMATE_DURATION = 200;
+    var hasVelocity = $.isFunction(html.velocity);
+
+    $('.sidebar-nav li').on('click', function () {
+      var item = $(this);
+      var activeTabClassName = 'sidebar-nav-active';
+      var activePanelClassName = 'sidebar-panel-active';
+      if (item.hasClass(activeTabClassName)) {
+        return;
+      }
+
+      var currentTarget = $('.' + activePanelClassName);
+      var target = $('.' + item.data('target'));
+
+      hasVelocity ?
+        currentTarget.velocity('transition.slideUpOut', TAB_ANIMATE_DURATION, function () {
+          target
+            .velocity('stop')
+            .velocity('transition.slideDownIn', TAB_ANIMATE_DURATION)
+            .addClass(activePanelClassName);
+        }) :
+        currentTarget.animate({ opacity: 0 }, TAB_ANIMATE_DURATION, function () {
+          currentTarget.hide();
+          target
+            .stop()
+            .css({'opacity': 0, 'display': 'block'})
+            .animate({ opacity: 1 }, TAB_ANIMATE_DURATION, function () {
+              currentTarget.removeClass(activePanelClassName);
+              target.addClass(activePanelClassName);
+            });
+        });
+
+      item.siblings().removeClass(activeTabClassName);
+      item.addClass(activeTabClassName);
+    });
+
+    $('.post-toc a').on('click', function (e) {
+      e.preventDefault();
+      var targetSelector = escapeSelector(this.getAttribute('href'));
+      var offset = $(targetSelector).offset().top;
+      hasVelocity ?
+        html.velocity('stop').velocity('scroll', {
+          offset: offset  + 'px',
+          mobileHA: false
+        }) :
+        $('html, body').stop().animate({
+          scrollTop: offset
+        }, 500);
+    });
+
+    // Expand sidebar on post detail page by default, when post has a toc.
+    motionMiddleWares.sidebar = function () {
+      var $tocContent = $('.post-toc-content');
+      if (CONFIG.sidebar === 'post') {
+        if ($tocContent.length > 0 && $tocContent.html().trim().length > 0) {
+          displaySidebar();
+        }
+      }
+    };
+  });
+</script>
+
+
+
+  <script type="text/javascript" src="/js/bootstrap.js"></script>
+
+  
+  
+
+  
+  
+
+</body>
+</html>

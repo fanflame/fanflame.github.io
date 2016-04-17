@@ -220,6 +220,198 @@
             
               
                 
+                <a class="post-title-link" href="/2016/04/17/android 初识EventBus/" itemprop="url">
+                  android 初识EventBus
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-04-17T00:00:00+08:00" content="2016-04-17">
+              2016-04-17
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/04/17/android 初识EventBus/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/17/android 初识EventBus/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody">
+            
+              <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">本文档基于EventBus <span class="number">3.0</span><span class="number">.0</span></span><br></pre></td></tr></table></figure>
+<p>EventBus是一个发布／订阅事件总线，用来优化android。<br><img src="http://upload-images.jianshu.io/upload_images/1322872-102b164552daadce.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="EventBus-Publish-Subscribe.png"></p>
+<p><strong>EventBus是什么</strong></p>
+<ul>
+<li>简化组件之间通信。<ol>
+<li>解耦事件的发送者和接受者。</li>
+<li>在Activities，Fragments和后台线程之间都有很好的表现</li>
+<li>避免复杂的和容易出错的依赖和生命周期</li>
+</ol>
+</li>
+<li>使代码简单</li>
+<li>快，高性能：特别是在注重性能的Android上。也许在其同类的解决方案是最快。</li>
+<li>小（jar包小于50K），但是强大：EventBus是一个很小的库，它的API超级简单。然而，你的软件架构也许非常受益于组件解耦：当使用事件的时候，订阅者不需要知道发送者</li>
+<li>在实践中被100,000,000+的应用安装测试证明</li>
+<li>有在线程间传递，订阅优先级等高级特性</li>
+<li>基于方便的注解（不牺牲性能）：只需要通过在你的订阅方法放置@Subscribe注解。因为是在编译的时候索引注解，EventBus不需要在app运行时间做注解反射（在android上会很慢）。</li>
+<li>android主线程传递：当和UI交互的时候，EventBus可以在主线程传递事件无论这个事件是怎么提交的。</li>
+<li>后台线程传递：如果订阅者运行长时间的任务，EventBus也可以使用后台线程来避免UI阻塞。</li>
+<li>事件和订阅继承：在EventBus中，事件和订阅类都是面向对象的范例。事件A是B的父类。提交B类型的事件也会提交给对A感兴趣的订阅者。类似的订阅者类也是如此。</li>
+<li>0配置：在代码中任何位置可以立刻使用一个默认的EventBus实例。</li>
+<li>可配置：可以按需求调整EventBus，可以使用建造者模式调整行为。</li>
+<li>EventBus和Android的广播和Intent系统有什么不同<br>不像Android的广播和intent系统，EventBus使用标准的java类作为事件并且提供更多的方便的API。EventBus更多的使用场景是不想麻烦的设置intent，准备intent extras，实现广播接收者，再提取intent extras。而且开销更低。</li>
+</ul>
+<p><strong>添加到你的工程</strong></p>
+<p>EventBus可以从JCenter和Maven中央仓库获取，所以只需在gradle脚本中添加这个依赖：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">complie</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br></pre></td></tr></table></figure>
+<p>###开始使用EventBus<br>使用EventBus只需3步。在此之前先在Gradle脚本中添加依赖。</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">complie</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br></pre></td></tr></table></figure>
+<p><strong>第一步：定义事件</strong></p>
+<p>事件是POJO（plain old java object）类型,不需要特别需求</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MessageEvent</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> String message;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MessageEvent</span><span class="params">(String message)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.message = message;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>第二步：准备订阅者</strong></p>
+<p>订阅者实现事件处理方法（也叫做订阅者方法），这个方法会在事件提交的时候被调用。这些是使用@Subscribe注解定义的。请注意EventBus 3的方法名字可以自由选择（不像EventBus 2中约束的那样）。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 当一个Message Event提交的时候这个方法会被调用</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessageEvent</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    Toast.makeText(getActivity(), <span class="keyword">event</span>.message, Toast.LENGTH_SHORT).show();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 当一个SomeOtherEvent被提交的时候这个方法被调用。</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleSomethingElse</span>(<span class="params">SomeOtherEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    doSomethingWith(<span class="keyword">event</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>订阅者也需要在bus中注册和注销。只有在订阅者注册的时候，他们才会收到事件。在Android中，Activities和Fragments通常绑定他们的生命周期.</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>.onStart();</span><br><span class="line">    EventBus.getDefault().register(<span class="keyword">this</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="annotation">@Override</span></span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">   EventBus.getDefault().unregister(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">super</span>.onStop();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>第三步：提交事件</strong></p>
+<p>在代码中任意部位提交事件。所有当前注册的匹配事件类型的订阅者会收到事件。</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EventBus.getDefault().post(<span class="keyword">new</span> MessageEvent(<span class="string">"Hello everyone!"</span>));</span><br></pre></td></tr></table></figure>
+<h3 id="u7EBF_u7A0B_u95F4_u4F20_u9012_uFF08_u7EBF_u7A0B_u6A21_u5F0F_uFF09"><a href="#u7EBF_u7A0B_u95F4_u4F20_u9012_uFF08_u7EBF_u7A0B_u6A21_u5F0F_uFF09" class="headerlink" title="线程间传递（线程模式）"></a>线程间传递（线程模式）</h3><p>事件可以在不同线程间传递。典型的使用就是用来处理UI改变，网络操作，或者耗时的操作。EventBus可以处理这些任务并同步UI线程（不必再考虑线程转换，使用AsyncTask，等）。<br>有四种线程模式：</p>
+<p><strong>线程模式：POSTING</strong></p>
+<p>默认情况下，订阅者在被提交事件的线程被调用。事件同步完成传递，一旦事件提交所有的订阅者都会被调用。这种模式意味着最小的开销，因为避免了线程切换。所以对那些花费很短的时间来完成，不需要在主线程中的简单的任务这是推荐使用的模式。事件处理程序使用这种应该是很快能返回，避免阻塞提交线程比如主线程。比如：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.POSTING) <span class="comment">// ThreadMode is optional here</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    log(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：MAIN</strong></p>
+<p>订阅者会在主线程被调用。如果提交的线程是主线程，事件处理方法会直接被调用（就像Thread.POSTING描述的那样同步）。事件处理程序使用这个模式必须快速返回避免阻塞主线程。比如：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.MAIN)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">    textField.setText(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：BACKGROUND</strong></p>
+<p>订阅者会在后台线程被调用。如果不是在主线程提交，事件处理方法会直接在提交线程被调用。如果是在主线程提交，EventBus使用一个单独的后台线程按顺序传递所有事件。事件处理使用这种模式应该尽快返回避免阻塞后台线程。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.BACKGROUND)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    saveToDisk(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>线程模式：ASYNC</strong></p>
+<p>事件处理方法会在一个单独的线程被调用。这个线程通常和提交的线程和主线程是独立的。提交的事件从不等待事件处理方法。事件处理方法如果需要花费一段时间比如访问网络应该使用这种模式。避免在同一时间触发大量长时间异步的处理方法来限制并发的线程。EventBus使用一个线程池来有效重复利用线程完成的异步事件处理程序的通知。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">@Subscribe(threadMode = ThreadMode.ASYNC)</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onMessage</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line">    backend.send(<span class="keyword">event</span>.message);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###配置<br>EventBusBuilder用来配置EventBus。比如，如果一个提交的事件没有订阅者，可以让EventBus保持安静。</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.logNoSubscriberMessages(<span class="literal">false</span>)</span><br><span class="line">    .sendNoSubscriberEvent(<span class="literal">false</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>另一个例子是当一个订阅者抛出一个异常的失败。注意：默认情况下，EventBus捕获异常从onEvent方法中抛出并且发出一个SubscriberExceptionEvent ，这个事件可能不必处理。</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.throwSubscriberException(<span class="literal">true</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>更多配置，查看<a href="http://greenrobot.org/files/eventbus/javadoc/3.0/org/greenrobot/eventbus/EventBusBuilder.html" target="_blank" rel="external">官方文档</a></p>
+<p><strong>配置默认EventBus实例</strong></p>
+<p>使用EventBus.getDefault()是一个简单的方法获取共享的EventBus实例。EventBusBuilder也可以使用installDefaultEventBus()方法来配置这个默认的实例。<br>比如，当在onEvent方法中发生异常的时候，可以配置默认的EventBus实例来重新抛出异常。建议在使用DEBUG模式的时候这么使用，因为这样app会因为这个异常而崩溃。</p>
+<figure class="highlight css"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">EventBus</span><span class="class">.builder</span>()<span class="class">.throwSubscriberException</span>(<span class="tag">BuildConfig</span><span class="class">.DEBUG</span>)<span class="class">.installDefaultEventBus</span>();</span><br></pre></td></tr></table></figure>
+<p>注意：只有在默认EventBus实例在第一次使用之前这么配置一次。后续调用installDefaultEventBus() 会抛出异常。这确保应用程序的行为一致。可以在Application类中配置默认的EventBus。</p>
+<p>###Sticky Event<br>一些事件携带在事件提交之后仍然感兴趣的信息。比如，一个事件标记一些初始化完成或者一些传感器或位置数据的最新的值。可以使用sticky事件来代替你自己的实现。EventBus在内存中保持某一个类型的最后的sticky事件。这个sticky事件可以传递到订阅者或者也可以被明确的查询。因此，不需要任何特殊的逻辑来考虑已经可用的数据。</p>
+<p><strong>Sticky实例</strong></p>
+<p>一个sticky事件是一段时间之前被提交的。</p>
+<figure class="highlight actionscript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">EventBus.getDefault().postSticky(<span class="keyword">new</span> MessageEvent(<span class="string">"Hello everyone!"</span>));</span><br></pre></td></tr></table></figure>
+<p>现在，sticky事件被提交了，一个新的activity启动。在注册过程中所有的sticky的订阅者方法都会立刻获取到之前提交的sticky事件：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStart</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">super</span>.onStart();</span><br><span class="line">        EventBus.getDefault().register(<span class="keyword">this</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Subscribe</span>(sticky = <span class="keyword">true</span>, threadMode = ThreadMode.MAIN)</span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(MessageEvent event)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// UI updates must run on MainThread</span></span><br><span class="line">        textField.setText(event.message);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onStop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        EventBus.getDefault().unregister(<span class="keyword">this</span>);</span><br><span class="line">        <span class="keyword">super</span>.onStop();</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p><strong>手动获取和移除sticky事件</strong></p>
+<p>就像前一段说的那样，最后的sticky事件在订阅者注册的时候会自动传递。但是，有时候手动检测sticky事件更方便。有时候他们不再传递的时候需要移除sticky事件。比如：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">MessageEvent stickyEvent =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>.getStickyEvent(MessageEvent.class<span class="function">)</span>;</span><br><span class="line">// Better<span class="instruction"> check </span>that an event was actually posted before</span><br><span class="line">if(stickyEvent != null<span class="function">)</span> &#123;</span><br><span class="line">    // <span class="string">"Consume"</span> the sticky event</span><br><span class="line">   <span class="function"> EventBus.getDefault(</span><span class="function">)</span>.removeStickyEvent(stickyEvent<span class="function">)</span>;</span><br><span class="line">    // Now do something with it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>removeStickyEvent方法是超载的：当传入一个类，它会返回之前保持的sticky事件。使用这中变化可以提升之前的例子。</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">MessageEvent stickyEvent =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>.removeStickyEvent(MessageEvent.class<span class="function">)</span>;</span><br><span class="line">// Better<span class="instruction"> check </span>that an event was actually posted before</span><br><span class="line">if(stickyEvent != null<span class="function">)</span> &#123;</span><br><span class="line">    // Now do something with it</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>###优先级和事件取消<br>大部分的EventBus都不需要优先级或事件取消，但是它们在特殊情况下会派上用场。比如，一个app在后台运行的时候一个事件触发了一些UI的逻辑 ，但是如果app当前对用户是不可见的，那么应该有不同的反应。</p>
+<p><strong>订阅者优先级</strong></p>
+<p>可以通过在注册期间提供的优先级来改变事件传递的顺序。</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="annotation">@Subscribe</span>(priority = <span class="number">1</span>);</span><br><span class="line"><span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">onEvent</span><span class="params">(MessageEvent event)</span> </span>&#123;</span><br><span class="line">…</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在相同的传递线程（ThreadMode），高优先级的订阅者接收事件会在低优先级之前。默认优先级是0。<br>注意：优先级不会对不同ThreadModes订阅者之间的传递顺序有影响。</p>
+<p><strong>取消事件传递</strong></p>
+<p>在订阅者事件处理方法中通过cancelEventDelivery（Object event）取消事件传递。任何之后的事件传递都会取消：后续的订阅者不再接收这个事件。</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Called in the same thread (default)</span></span><br><span class="line">@<span class="function">Subscribe</span><br><span class="line"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEvent</span>(<span class="params">MessageEvent <span class="keyword">event</span></span>)</span>&#123;</span><br><span class="line"><span class="comment">// Process the event</span></span><br><span class="line">…</span><br><span class="line"></span><br><span class="line">EventBus.getDefault().cancelEventDelivery(<span class="keyword">event</span>) ;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>事件通常是被优先级高的订阅者取消。取消对于运行在提交线程ThreadMode.PostThread的事件处理方法是被限制的。</p>
+<p>###订阅者索引</p>
+<p>订阅者索引（subscriber index）是EventBus3的新特性。这是个可选的优化项来提速初始化订阅者注册。订阅者索引可以使用EventBus的注解处理器在编译阶段创建。虽然使用索引不是必须的，但是android最佳实践还是推荐使用。</p>
+<p><strong>索引先决条件</strong></p>
+<p>注意只有订阅者和事件类是public，@Subscriber方法能被索引。由于java的注解本身处理的技术限制，@Subscribe注解不会被匿名内部类识别。当EventBus不能使用索引，它会自动回退到运行时起作用。所以它仍然起作用，只是慢了一点。</p>
+<p><strong>生成索引</strong></p>
+<p>为了能够生成索引，需要添加EventBus注解处理器到使用了android－apt gradle插件的编译环境。还需要传递一个参数为“eventBusIndex”到指定完全限定的想要生成索引的类。添加下面的部分到Gradle编译脚本：</p>
+<figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="title">buildscript</span> &#123;</span><br><span class="line">    <span class="title">dependencies</span> &#123;</span><br><span class="line">        <span class="title">classpath</span> <span class="string">'com.neenbedankt.gradle.plugins:android-apt:1.8'</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">apply plugin: <span class="string">'com.neenbedankt.android-apt'</span></span><br><span class="line">dependencies &#123;</span><br><span class="line">    <span class="title">compile</span> <span class="string">'org.greenrobot:eventbus:3.0.0'</span></span><br><span class="line">    apt <span class="string">'org.greenrobot:eventbus-annotation-processor:3.0.1'</span></span><br><span class="line">&#125;</span><br><span class="line">apt &#123;</span><br><span class="line">    <span class="title">arguments</span> &#123;</span><br><span class="line">        <span class="title">eventBusIndex</span> <span class="string">"com.example.myapp.MyEventBusIndex"</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当下次编译工程的时候，“eventBusIndex”这个类会生成。当设置EventBus的时候，只需要这样：</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span>.addIndex(new <span class="type">MyEventBusIndex</span><span class="literal">()</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>或者想使用默认的实例，可以这样：</p>
+<figure class="highlight smali"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">EventBus.builder(<span class="function">)</span>.addIndex(new<span class="function"> MyEventBusIndex(</span><span class="function">)</span><span class="function">)</span>.installDefaultEventBus(<span class="function">)</span>;</span><br><span class="line">// Now the default<span class="instruction"> instance </span>uses the given index. Use it like this:</span><br><span class="line">EventBus eventBus =<span class="function"> EventBus.getDefault(</span><span class="function">)</span>;</span><br></pre></td></tr></table></figure>
+<p><strong>索引Libraries</strong></p>
+<p>应用相同的原理来索引Library的一部分代码（并不是最终的应用程序）。这样，可以会生成多个索引类，在设置EventBus的时候这样使：</p>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">EventBus</span> eventBus = <span class="type">EventBus</span>.builder<span class="literal">()</span></span><br><span class="line">    .addIndex(new <span class="type">MyEventBusAppIndex</span><span class="literal">()</span>)</span><br><span class="line">    .addIndex(new <span class="type">MyEventBusLibIndex</span><span class="literal">()</span>).build<span class="literal">()</span>;</span><br></pre></td></tr></table></figure>
+<p>###混淆<br>混淆器混淆方法名称，有可能会移除方法那些没有调用的方法。因为订阅方法没有被直接调用，混淆器误认为他们没有被使用。在ProGuard配置中使用下面的片段保护订阅者被移除：</p>
+<figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">-keepattributes *<span class="constant">Annotation</span>*</span><br><span class="line">-keepclassmembers <span class="class"><span class="keyword">class</span> ** &#123;</span></span><br><span class="line">    <span class="variable">@org</span>.greenrobot.eventbus.<span class="constant">Subscribe</span> &lt;methods&gt;;</span><br><span class="line">&#125;</span><br><span class="line">-keep <span class="class"><span class="keyword">enum</span> <span class="title">org</span>.<span class="title">greenrobot</span>.<span class="title">eventbus</span>.<span class="title">ThreadMode</span> &#123; *;</span> &#125;</span><br><span class="line"></span><br><span class="line"><span class="comment"># Only required if you use AsyncExecutor</span></span><br><span class="line">-keepclassmembers <span class="class"><span class="keyword">class</span> * <span class="title">extends</span> <span class="title">org</span>.<span class="title">greenrobot</span>.<span class="title">eventbus</span>.<span class="title">util</span>.<span class="title">ThrowableFailureEvent</span> &#123;</span></span><br><span class="line">    &lt;init&gt;(java.lang.<span class="constant">Throwable</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意：不管是否使用索引，都需要这么配置。</p>
+<p>###AsyncExecutor</p>
+<p>免责声明：AsyncExecutor不是一个核心的utility类。在处理后台线程它也许会保存一些错误代码，但是它不是一个核心的EventBus类。<br>AsyncExecutor像一个线程池，但是有错误（异常）处理。错误会抛出异常，AsyncExecutor会在事件中包裹这些异常。<br>通常调用AsyncExecutor.create()方法在Application中来创建一个实例。实现RunnableEx接口来执行。RunnableEx和Runnable不一样，RunnableEx会抛出异常。<br>如果RunnableEx的实现抛出一个异常，它会在ThrowableFailureEvent中捕获到。<br>执行的例子：</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">AsyncExecutor.create().execute(</span><br><span class="line">  <span class="keyword">new</span> RunnableEx &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> run <span class="keyword">throws</span> LoginException &#123;</span><br><span class="line">      <span class="comment">// No need to catch any Exception (here: LoginException)</span></span><br><span class="line">      remote.login();</span><br><span class="line">      EventBus.getDefault().postSticky(<span class="keyword">new</span> LoggedInEvent());</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接收的例子：</p>
+<figure class="highlight cs"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEventMainThread</span>(<span class="params">LoggedInEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Change some UI</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onEventMainThread</span>(<span class="params">ThrowableFailureEvent <span class="keyword">event</span></span>) </span>&#123;</span><br><span class="line">  <span class="comment">// Show error in UI</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><strong>AsyncExecutor生成器</strong></p>
+<p>使用静态的Async Executor来自定义Async Executor实例。它会返回一个生成器来自定义EventBus实例，线程池，和失败的事件类。<br>另一个可以自定义的选项是提供错误事件上下文环境信息的执行范围。比如，一个错误事件可能只关联到一个指定的Activity实例或类。你自定义错误事件实现了HasExecutionScope接口，AsyncExecutor会自动设置执行范围。这样，订阅者可以在它执行范围查询错误事件并基于它做出相应操作。</p>
+
+            
+          </span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
                 <a class="post-title-link" href="/2016/04/02/Android CountDownTimer源码解析/" itemprop="url">
                   Android CountDownTimer源码解析
                 </a>
@@ -265,8 +457,7 @@
         
           <span itemprop="articleBody">
             
-              <p>###CountDownTimer</p>
-<p>CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。<br>比如一个简单的使用场景：一个30秒倒计时</p>
+              <h3 id="CountDownTimer"><a href="#CountDownTimer" class="headerlink" title="CountDownTimer"></a>CountDownTimer</h3><p>CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。<br>比如一个简单的使用场景：一个30秒倒计时</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> CountDownTimer(<span class="number">30000</span>, <span class="number">1000</span>) &#123;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onTick</span><span class="params">(<span class="keyword">long</span> millisUntilFinished)</span> </span>&#123;</span><br><span class="line">        mTextField.setText(<span class="string">"seconds remaining: "</span> + millisUntilFinished / <span class="number">1000</span>);</span><br><span class="line">   &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFinish</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mTextField.setText(<span class="string">"done!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;.start();</span><br></pre></td></tr></table></figure>
 <p> onTick方法对这个对象来说是同步的，当onTick方法的实现花费的时间和倒计时的间隔来说需要很久的时候，调用onTick也是按照顺序发生的，方法不会在之前的回调完成之前发生。</p>
 <figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">long</span> mStopTimeInFuture;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * 是否取消</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> mCancelled = <span class="keyword">false</span>;</span><br></pre></td></tr></table></figure>
@@ -283,6 +474,199 @@
 <p>处理倒计时的handler</p>
 <figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> Handler mHandler = <span class="keyword">new</span> Handler() &#123;</span><br><span class="line"></span><br><span class="line">    <span class="annotation">@Override</span></span><br><span class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">synchronized</span> (CountDownTimer.<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (mCancelled) &#123;</span><br><span class="line">                <span class="keyword">return</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">final</span> <span class="keyword">long</span> millisLeft = mStopTimeInFuture - SystemClock.elapsedRealtime();</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (millisLeft &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">                onFinish();</span><br><span class="line">            &#125; <span class="function"><span class="keyword">else</span> <span class="title">if</span> <span class="params">(millisLeft &lt; mCountdownInterval)</span> </span>&#123;</span><br><span class="line">                <span class="comment">// 剩余时间小于一次时间间隔的时候，不再通知，只是延迟一下</span></span><br><span class="line">                sendMessageDelayed(obtainMessage(MSG), millisLeft);</span><br><span class="line">            &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                <span class="keyword">long</span> lastTickStart = SystemClock.elapsedRealtime();</span><br><span class="line">                onTick(millisLeft);</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 处理用户onTick执行的时间</span></span><br><span class="line">                <span class="keyword">long</span> delay = lastTickStart + mCountdownInterval - SystemClock.elapsedRealtime();</span><br><span class="line"></span><br><span class="line">                <span class="comment">// 特殊情况：用户的onTick方法花费的时间比interval长，那么直接跳转到下一次interval</span></span><br><span class="line">                <span class="keyword">while</span> (delay &lt; <span class="number">0</span>) delay += mCountdownInterval;</span><br><span class="line"></span><br><span class="line">                sendMessageDelayed(obtainMessage(MSG), delay);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 <p>通过源码可知，CountDownTimer采用的是handler机制，通过sendMessageDelayed延迟发送一条message到主线程的looper中，然后在自身中收到之后判断剩余时间，并发出相关回调，然后再次发出message的方式。之前实现这种倒计时是通过asynctask，在线程中通过Thread.sleep来实现，通过asyntask的cancel来实现取消，通过构造asynctask传入接口的实现来onTick的类似功能。这个CountDownTimer默认是在当前looper当中，可以是在UI线程也可以是在非UI线程中执行，如果在UI线程中执行，那是不是会稍微加重UI线程的负担？</p>
+
+            
+          </span>
+        
+      
+    </div>
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </article>
+
+
+    
+      
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                
+                <a class="post-title-link" href="/2016/03/29/LruCache解析/" itemprop="url">
+                  LruCache解析
+                </a>
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            发表于
+            <time itemprop="dateCreated" datetime="2016-03-29T00:00:00+08:00" content="2016-03-29">
+              2016-03-29
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/03/29/LruCache解析/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/03/29/LruCache解析/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body">
+
+      
+      
+
+      
+        
+          <span itemprop="articleBody">
+            
+              <h3 id="LruCache"><a href="#LruCache" class="headerlink" title="LruCache"></a>LruCache</h3><p>LruCache,最近最少使用缓存算法，乍一听好复杂的算法，还得记录和比较使用次数啥的，看来源码才知道，原来只是名字挺唬人。</p>
+<p>LruCache是一种保持一定数量values（被缓存的值）的强引用的缓存。每次缓存value的时候，它会移到队列的头部。当一个value添加到一个已经满的缓存的时候，那个队列最后的value会被抛弃并且这时候最后的value可以被垃圾回收。如果缓存的values持有的资源需要明确的释放，重写entryRemoved方法来释放持有的资源。</p>
+<p>如果一个cache miss(缓存未命中)的时候需要得到key值相对应的value，重写create()方法.即使有一个cache miss，也允许一直返回一个它假定的值,这是为了简化调用代码，</p>
+<p>默认情况下，缓存大小通过entries的数量来计算。重写sizeOf方法按不同的单位来计算缓存。比如：</p>
+ <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> cacheSize = <span class="number">4</span> * <span class="number">1024</span> * <span class="number">1024</span>; <span class="comment">// 4MiB</span></span><br><span class="line">LruCache&lt;String, Bitmap&gt; bitmapCache = <span class="keyword">new</span> LruCache&lt;String, Bitmap&gt;(cacheSize) &#123;</span><br><span class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">sizeOf</span><span class="params">(String key, Bitmap value)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> value.getByteCount();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p> 这个类是线程安全的。执行多个缓存操作会原子的按以下同步缓存。</p>
+ <figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">synchronized</span> (cache) &#123;</span><br><span class="line">  <span class="keyword">if</span> (cache.<span class="built_in">get</span>(<span class="variable">key</span>) == <span class="keyword">null</span>) &#123;</span><br><span class="line">      cache.put(<span class="variable">key</span>, value);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;&#125;</span><br></pre></td></tr></table></figure>
+<p>这个类不允许key或value为null。从get,put,remove返回的null表示key不存在<br>从android3.1开始出现</p>
+<p>LruCache<k,v>构造方法传入缓存的最大值，内部使用LinkedHashMap<k,v>来保存缓存的值</k,v></k,v></p>
+   <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="title">LruCache</span><span class="params">(<span class="keyword">int</span> maxSize)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (maxSize &lt;= <span class="number">0</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"maxSize &lt;= 0"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.maxSize = maxSize;</span><br><span class="line">    <span class="keyword">this</span>.<span class="built_in">map</span> = <span class="keyword">new</span> LinkedHashMap&lt;K, V&gt;(<span class="number">0</span>, <span class="number">0.75f</span>, <span class="literal">true</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<pre><code>/**
+ * @hide
+ */
+public void resize(int maxSize) {
+    if (maxSize &lt;= 0) {
+        throw new IllegalArgumentException(&quot;maxSize &lt;= 0&quot;);
+    }
+
+    synchronized (this) {
+        this.maxSize = maxSize;
+    }
+    trimToSize(maxSize);
+}
+<figure class="highlight livecodeserver"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">    </span><br><span class="line"><span class="built_in">get</span>方法，如果在缓存中存在或者可以通过<span class="built_in">create</span>方法创建的，返回key对应的<span class="built_in">value</span>值。如果<span class="built_in">value</span>返回了，它会移到队列的头部。如果这个<span class="built_in">value</span>没有被缓存或不能被创建，返回<span class="constant">null</span>.</span><br></pre></td></tr></table></figure>
+
+public final V get(K key) {
+    if (key == null) {
+        throw new NullPointerException(&quot;key == null&quot;);
+    }
+
+    V mapValue;
+    synchronized (this) {
+        mapValue = map.get(key);//从hashmap中获取key对应的缓存值。
+        if (mapValue != null) {
+            hitCount++;//不为空，缓存命中加1
+            return mapValue;
+        }
+        missCount++;//若为空缓存未命中加1
+    }
+
+    /*
+       缓存未击中之后会将该值加入到map中。接下来会尝试通过用户重写的create方法创建一个value。这个创建过程可能会花好久，当create（）返回的时候map可能会变的有所不一样。
+       当create()执行的时候，如果map中添加了一个冲突的value,那么不管map中的value，将刚创建的value释放掉。
+     */
+
+    V createdValue = create(key);
+    if (createdValue == null) {
+        return null;
+    }
+
+    synchronized (this) {
+        createCount++;
+        mapValue = map.put(key, createdValue);//hashmap put方法，返回key之前对应的值
+
+        if (mapValue != null) {
+            // 这有一个冲突，所以撤销最后一次put，也就是将之前的值再put回去。
+            map.put(key, mapValue);
+        } else {
+            size += safeSizeOf(key, createdValue);
+        }
+    }
+
+    if (mapValue != null) {//释放刚刚创建的value持有的资源。
+        entryRemoved(false, key, createdValue, mapValue);
+        return mapValue;
+    } else {
+        trimToSize(maxSize);
+        return createdValue;
+    }
+}
+</code></pre><figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">put方法，被添加的value会移动到队列的头部，返回<span class="variable">key</span>之前映射的value</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">```   </span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> V put(K <span class="variable">key</span>, V value) &#123;</span><br><span class="line">        <span class="keyword">if</span> (<span class="variable">key</span> == <span class="keyword">null</span> || value == <span class="keyword">null</span>) &#123;</span><br><span class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"key == null || value == null"</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        V previous;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            putCount++;<span class="comment">//put计数器</span></span><br><span class="line">            <span class="built_in">size</span> += safeSizeOf(<span class="variable">key</span>, value);</span><br><span class="line">            previous = <span class="built_in">map</span>.put(<span class="variable">key</span>, value);</span><br><span class="line">            <span class="keyword">if</span> (previous != <span class="keyword">null</span>) &#123;<span class="comment">//key之前有对应的值</span></span><br><span class="line">                <span class="built_in">size</span> -= safeSizeOf(<span class="variable">key</span>, previous);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (previous != <span class="keyword">null</span>) &#123;<span class="comment">//释放之前value持有的资源。</span></span><br><span class="line">            entryRemoved(<span class="keyword">false</span>, <span class="variable">key</span>, previous, value);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        trimToSize(maxSize);</span><br><span class="line">        <span class="keyword">return</span> previous;</span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+<p>trimToSize方法。移除最老的entries直到所有剩余的entries在要求的大小之内。maxSize 在返回之前最大缓存值。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">void</span> trimToSize(<span class="built_in">int</span> maxSize) &#123;</span><br><span class="line">    <span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">        K <span class="variable">key</span>;</span><br><span class="line">        V value;</span><br><span class="line">        <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">size</span> &lt; <span class="number">0</span> || (<span class="built_in">map</span>.isEmpty() &amp;&amp; <span class="built_in">size</span> != <span class="number">0</span>)) &#123;</span><br><span class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(getClass().getName()</span><br><span class="line">                        + <span class="string">".sizeOf() is reporting inconsistent results!"</span>);</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="keyword">if</span> (<span class="built_in">size</span> &lt;= maxSize) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">           <span class="comment">// 获取到linked列表的最后一项</span></span><br><span class="line">           <span class="comment">// 不同版本，这得实现可能不同</span></span><br><span class="line">            Map.Entry&lt;K, V&gt; toEvict = <span class="keyword">null</span>;</span><br><span class="line">            <span class="keyword">for</span> (Map.Entry&lt;K, V&gt; entry : <span class="built_in">map</span>.entrySet()) &#123;</span><br><span class="line">                toEvict = entry;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> (toEvict == <span class="keyword">null</span>) &#123;</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            <span class="variable">key</span> = toEvict.getKey();</span><br><span class="line">            value = toEvict.getValue();</span><br><span class="line">            <span class="built_in">map</span>.remove(<span class="variable">key</span>);</span><br><span class="line">            <span class="built_in">size</span> -= safeSizeOf(<span class="variable">key</span>, value);</span><br><span class="line">            evictionCount++;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        entryRemoved(<span class="keyword">true</span>, <span class="variable">key</span>, value, <span class="keyword">null</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>remve方法，返回key对应的value</p>
+<pre><code>public final V remove(K key) {
+    if (key == null) {
+        throw new NullPointerException(&quot;key == null&quot;);
+    }
+
+    V previous;
+    synchronized (this) {
+        previous = map.remove(key);
+        if (previous != null) {//成功移除，修改缓存当前大小
+            size -= safeSizeOf(key, previous);
+        }
+    }
+
+    if (previous != null) {//释放资源
+        entryRemoved(false, key, previous, null);
+    }
+
+    return previous;
+}
+</code></pre><p>entryRemoved方法。已经被驱逐或被移除的entries会调用这个方法。当一个value被驱逐来释放空间，调用remove来移除或者调用put方法替换的时候会调用这个方法。默认实现什么都不做。方法调用的时候没有同步：在这个方法执行的时候其他线程可以访问缓存。evicted参数：如果entry被移除来释放空间返回true,如果移除是因为put方法或remove方法返回false。newValue参数表示key对应的新的value(如果存在的话).这个值如果不为空，是因为put引起的。否则的话是驱逐或remove引起的</p>
+ <figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function"><span class="keyword">void</span> <span class="title">entryRemoved</span><span class="params">(<span class="keyword">boolean</span> evicted, K key, V oldValue, V newValue)</span> </span>&#123;&#125;</span><br></pre></td></tr></table></figure>
+<p> create方法。在缓存未中之后调用来计算key映射的value.方法调用的时候没有同步：在这个方法执行的时候其他线程可以访问缓存。当这个方法返回的时候，如果key对应的value在cache中存在，创建的value会通过entryRemove()释放并丢弃。当多个线程在同一时间请求相同的key的时候（引起多个values被创建），或者当一个线程调用put方法另一个正在为这个key创建一个value可能会发生这种情况</p>
+<figure class="highlight aspectj"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">protected</span> <span class="function">V <span class="title">create</span><span class="params">(K key)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>safeSizeOf方法，检测用户重写的sizeOf方法的返回值是否合法。</p>
+<figure class="highlight nimrod"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">private <span class="type">int</span> safeSizeOf(K key, V value) &#123;</span><br><span class="line">    <span class="type">int</span> <span class="literal">result</span> = sizeOf(key, value);</span><br><span class="line">    <span class="keyword">if</span> (<span class="literal">result</span> &lt; <span class="number">0</span>) &#123;</span><br><span class="line">        throw new <span class="type">IllegalStateException</span>(<span class="string">"Negative size: "</span> + key + <span class="string">"="</span> + value);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">result</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>sizeOf方法按用户定义的单位返回entry的大小。默认实现是返回1，这时候size表示entris的数量，max size表示entries的最大数量。entry的大小在缓存期间不能改变</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">int</span> <span class="title">sizeOf</span><span class="params">(K key, V value)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * 清空缓存</span><br><span class="line"> */</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> final <span class="keyword">void</span> <span class="title">evictAll</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    trimToSize(-<span class="number">1</span>); </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>size方法，final类型，不能被子类重写。如果缓存没有重写sizeOf()方法，这个方法返回缓存中entries的数量。对于其他的缓存，这个返回缓存中entries大小的和。</p>
+<figure class="highlight gradle"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">final</span> <span class="keyword">int</span> <span class="keyword">size</span>() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">size</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>snapshot方法返回当前缓存内容的拷贝，按照最近最少使用到最近最多使用的顺序。</p>
+<figure class="highlight processing"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">final</span> Map&lt;K, V&gt; snapshot() &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> LinkedHashMap&lt;K, V&gt;(<span class="built_in">map</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>总之，LruCache内部使用LinkedHashMap来保存缓存的值。初始化的时候传入缓存的最大值或者缓存的最大个数（如果sizeOf方法返回1的话）。如果重写来create方法，在使用get方法的时候，如果缓存不存在，就将新创建的value加入到缓存中，这样就不用再次使用put来加入缓存了（因为create不是线程安全的，所以，创建成功之后是否应该加入缓存还需要再判断一下）。</p>
 
             
           </span>
@@ -1084,7 +1468,7 @@ public Looper getLooper() {
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -1098,7 +1482,7 @@ public Looper getLooper() {
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>

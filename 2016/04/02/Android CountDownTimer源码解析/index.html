@@ -51,22 +51,19 @@
 
 
 
-<meta name="description" content="###CountDownTimer
-CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
-123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long">
+<meta name="description" content="CountDownTimerCountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
+123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long mill">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Android CountDownTimer源码解析">
 <meta property="og:url" content="http://yoursite.com/2016/04/02/Android CountDownTimer源码解析/index.html">
 <meta property="og:site_name" content="梵依然">
-<meta property="og:description" content="###CountDownTimer
-CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
-123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long">
-<meta property="og:updated_time" content="2016-04-17T01:12:13.000Z">
+<meta property="og:description" content="CountDownTimerCountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
+123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long mill">
+<meta property="og:updated_time" content="2016-04-17T01:17:27.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android CountDownTimer源码解析">
-<meta name="twitter:description" content="###CountDownTimer
-CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
-123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long">
+<meta name="twitter:description" content="CountDownTimerCountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。比如一个简单的使用场景：一个30秒倒计时
+123456789new CountDownTimer(30000, 1000) &amp;#123;     public void onTick(long mill">
 
 
 
@@ -258,8 +255,7 @@ CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通�
       
 
       
-        <span itemprop="articleBody"><p>###CountDownTimer</p>
-<p>CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。<br>比如一个简单的使用场景：一个30秒倒计时</p>
+        <span itemprop="articleBody"><h3 id="CountDownTimer"><a href="#CountDownTimer" class="headerlink" title="CountDownTimer"></a>CountDownTimer</h3><p>CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通过handler来实现一个倒计时的操作。在倒计时期间会定期调用用户实现的回调函数。<br>比如一个简单的使用场景：一个30秒倒计时</p>
 <figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> CountDownTimer(<span class="number">30000</span>, <span class="number">1000</span>) &#123;</span><br><span class="line"></span><br><span class="line">     <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onTick</span><span class="params">(<span class="keyword">long</span> millisUntilFinished)</span> </span>&#123;</span><br><span class="line">        mTextField.setText(<span class="string">"seconds remaining: "</span> + millisUntilFinished / <span class="number">1000</span>);</span><br><span class="line">   &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFinish</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        mTextField.setText(<span class="string">"done!"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;.start();</span><br></pre></td></tr></table></figure>
 <p> onTick方法对这个对象来说是同步的，当onTick方法的实现花费的时间和倒计时的间隔来说需要很久的时候，调用onTick也是按照顺序发生的，方法不会在之前的回调完成之前发生。</p>
 <figure class="highlight axapta"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">long</span> mStopTimeInFuture;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span><br><span class="line"> * 是否取消</span><br><span class="line"> */</span></span><br><span class="line"><span class="keyword">private</span> <span class="keyword">boolean</span> mCancelled = <span class="keyword">false</span>;</span><br></pre></td></tr></table></figure>
@@ -293,13 +289,17 @@ CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通�
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2016/02/01/loader解析/" rel="next" title="Loader&AsyncTaskLoader<D>&CursorLoader&CancellationSignal&LoaderManager">
-                <i class="fa fa-chevron-left"></i> Loader&AsyncTaskLoader<D>&CursorLoader&CancellationSignal&LoaderManager
+              <a href="/2016/03/29/LruCache解析/" rel="next" title="LruCache解析">
+                <i class="fa fa-chevron-left"></i> LruCache解析
               </a>
             
           </div>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/17/android 初识EventBus/" rel="prev" title="android 初识EventBus">
+                android 初识EventBus <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -371,7 +371,7 @@ CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通�
         <nav class="site-state motion-element">
           <div class="site-state-item site-state-posts">
             <a href="/archives">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">日志</span>
             </a>
           </div>
@@ -385,7 +385,7 @@ CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通�
 
           <div class="site-state-item site-state-tags">
             <a href="/tags">
-              <span class="site-state-item-count">6</span>
+              <span class="site-state-item-count">8</span>
               <span class="site-state-item-name">标签</span>
               </a>
           </div>
@@ -417,7 +417,7 @@ CountDownTimer是android sdk中os包下的一个辅助抽象类，这个类通�
               
             
             
-              <p class="post-toc-empty">此文章未包含目录</p>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#CountDownTimer"><span class="nav-number">1.</span> <span class="nav-text">CountDownTimer</span></a></li></ol></div>
             
           </div>
           <div class="post-toc-indicator-bottom post-toc-indicator">
